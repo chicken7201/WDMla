@@ -18,6 +18,7 @@ import com.gtnewhorizons.wdmla.wailacompat.DataProviderCompat;
 import com.gtnewhorizons.wdmla.wailacompat.RayTracingCompat;
 import com.gtnewhorizons.wdmla.wailacompat.TooltipCompat;
 
+import mcp.mobius.waila.api.impl.ConfigHandler;
 import mcp.mobius.waila.api.impl.DataAccessorCommon;
 import mcp.mobius.waila.network.Message0x03EntRequest;
 import mcp.mobius.waila.network.WailaPacketHandler;
@@ -29,8 +30,7 @@ public class EntityAccessorClientHandler implements AccessorClientHandler<Entity
 
     @Override
     public boolean shouldDisplay(EntityAccessor accessor) {
-        // TODO: config
-        return true;
+        return ConfigHandler.instance().getConfig("general.showents");
     }
 
     @Override
