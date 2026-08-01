@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.gtnewhorizons.wdmla.api.ITTRenderParser;
 import com.gtnewhorizons.wdmla.api.ui.ITooltip;
@@ -55,15 +56,15 @@ public class TooltipCompat {
 
                         switch (renderName) {
                             case "waila.health":
-                                String[] healthArgs = renderMatcher.group("args").split(",");
+                                String[] healthArgs = splitRendererArgs(renderMatcher.group("args"));
                                 lineComponent.child(healthParser.parse(healthArgs));
                                 break;
                             case "waila.stack":
-                                String[] itemArgs = renderMatcher.group("args").split(",");
+                                String[] itemArgs = splitRendererArgs(renderMatcher.group("args"));
                                 lineComponent.child(itemParser.parse(itemArgs));
                                 break;
                             case "waila.progress":
-                                String[] progressArgs = renderMatcher.group("args").split(",");
+                                String[] progressArgs = splitRendererArgs(renderMatcher.group("args"));
                                 lineComponent.child(progressParser.parse(progressArgs));
                                 break;
                             default:
@@ -79,5 +80,13 @@ public class TooltipCompat {
             }
         }
         return verticalLayout;
+    }
+
+    /** Splits current Waila renderer arguments while accepting the legacy comma encoding. */
+    private static String[] splitRendererArgs(String args) {
+        if (args.contains(WailaRendererComma)) {
+            return args.split(Pattern.quote(WailaRendererComma));
+        }
+        return args.split(",");
     }
 }

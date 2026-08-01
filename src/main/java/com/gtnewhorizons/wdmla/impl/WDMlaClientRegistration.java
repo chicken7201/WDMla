@@ -15,8 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
-import org.lwjgl.input.Keyboard;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -156,9 +154,10 @@ public class WDMlaClientRegistration implements IWDMlaClientRegistration {
         return Waila.instance.serverPresent;
     }
 
+    /** Returns whether the current Waila advanced-details key is held. */
     @Override
     public boolean isShowDetailsPressed() {
-        return Keyboard.isKeyDown(KeyEvent.key_details.getKeyCode());
+        return KeyEvent.key_show_advanced.getIsKeyPressed();
     }
 
     @Override

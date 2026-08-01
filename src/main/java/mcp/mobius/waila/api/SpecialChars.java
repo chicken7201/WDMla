@@ -43,6 +43,7 @@ public class SpecialChars {
     public static String WailaStyle = "\u00A4";
     public static String WailaIcon = "\u00A5";
     public static String WailaRenderer = "\u00A6";
+    public static String WailaRendererComma = "\u0082";
     public static String TAB = WailaStyle + WailaStyle + "a";
     public static String ALIGNRIGHT = WailaStyle + WailaStyle + "b";
     public static String ALIGNCENTER = WailaStyle + WailaStyle + "c";
@@ -53,8 +54,13 @@ public class SpecialChars {
 
     public static final Pattern patternMinecraft = Pattern.compile("(?i)" + MCStyle + "[0-9A-FK-OR]");
     public static final Pattern patternWaila = Pattern.compile("(?i)(" + WailaStyle + "(?<type>..))");
-    public static final Pattern patternRender = Pattern
-            .compile("(?i)(" + RENDER + "\\{(?<name>[^,}]*),?(?<args>[^}]*)\\})");
+    public static final Pattern patternRender = Pattern.compile(
+            "(?i)(" + RENDER
+                    + "\\{(?<name>[^,"
+                    + WailaRendererComma
+                    + "}]*)(?:[,"
+                    + WailaRendererComma
+                    + "])?(?<args>[^}]*)\\})");
     public static final Pattern patternTab = Pattern.compile("(?i)" + TAB);
     public static final Pattern patternRight = Pattern.compile("(?i)" + ALIGNRIGHT);
     public static final Pattern patternCenter = Pattern.compile("(?i)" + ALIGNCENTER);
@@ -70,7 +76,11 @@ public class SpecialChars {
                     + "[0-9A-Z]|"
                     + WailaStyle
                     + WailaRenderer
-                    + "a\\{([^,}]*),?([^}]*)\\}|[^"
+                    + "a\\{([^,"
+                    + WailaRendererComma
+                    + "}]*)(?:[,"
+                    + WailaRendererComma
+                    + "])?([^}]*)\\}|[^"
                     + WailaStyle
                     + "]+)");
 
@@ -81,7 +91,7 @@ public class SpecialChars {
     public static String getRenderString(String name, String... params) {
         StringBuilder result = new StringBuilder(RENDER + "{" + name);
         for (String s : params) {
-            result.append(",").append(s);
+            result.append(WailaRendererComma).append(s);
         }
         result.append("}");
         return result.toString();

@@ -3,15 +3,19 @@ package com.gtnewhorizons.wdmla.wailacompat;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 
+import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.api.IWailaEntityProvider;
 import mcp.mobius.waila.api.impl.ConfigHandler;
 import mcp.mobius.waila.api.impl.DataAccessorCommon;
 import mcp.mobius.waila.api.impl.ModuleRegistrar;
 import mcp.mobius.waila.api.impl.TipList;
+import mcp.mobius.waila.cbcore.LangUtil;
+import mcp.mobius.waila.client.KeyEvent;
 import mcp.mobius.waila.utils.WailaExceptionHandler;
 
 /**
@@ -19,6 +23,7 @@ import mcp.mobius.waila.utils.WailaExceptionHandler;
  */
 public class DataProviderCompat {
 
+    /** Collects legacy block tooltip lines, including current Waila advanced-body data. */
     public List<String> getLegacyBlockTooltips(ItemStack itemForm, DataAccessorCommon legacyAccessor) {
         List<String> legacyTooltips = new TipList<String, String>();
         try {
@@ -40,11 +45,24 @@ public class DataProviderCompat {
             LinkedHashMap<Integer, List<IWailaDataProvider>> legacyBodyProviders = new LinkedHashMap<>();
             legacyBodyProviders.putAll(ModuleRegistrar.instance().getBodyProviders(legacyAccessor.getBlock()));
             legacyBodyProviders.putAll(ModuleRegistrar.instance().getBodyProviders(legacyAccessor.getTileEntity()));
+            IWailaConfigHandler config = ConfigHandler.instance();
+            boolean hasAdvancedBodyAvailable = false;
+            boolean isAdvancedKeyDown = KeyEvent.key_show_advanced.getIsKeyPressed();
             for (List<IWailaDataProvider> providersList : legacyBodyProviders.values()) {
                 for (IWailaDataProvider dataProvider : providersList) {
-                    legacyTooltips = dataProvider
-                            .getWailaBody(itemForm, legacyTooltips, legacyAccessor, ConfigHandler.instance());;
+                    legacyTooltips = dataProvider.getWailaBody(itemForm, legacyTooltips, legacyAccessor, config);
+                    if (dataProvider.hasWailaAdvancedBody(itemForm, legacyAccessor, config)) {
+                        hasAdvancedBodyAvailable = true;
+                        if (isAdvancedKeyDown) {
+                            legacyTooltips = dataProvider
+                                    .getWailaAdvancedBody(itemForm, legacyTooltips, legacyAccessor, config);
+                        }
+                    }
                 }
+            }
+            if (hasAdvancedBodyAvailable && !isAdvancedKeyDown) {
+                String keyName = GameSettings.getKeyDisplayString(KeyEvent.key_show_advanced.getKeyCode());
+                legacyTooltips.add(LangUtil.translateG("hud.msg.holdkeymoreinfo", keyName));
             }
 
             // Hopefully no mod edits mod name in Waila...
@@ -64,6 +82,7 @@ public class DataProviderCompat {
         return legacyTooltips;
     }
 
+    /** Collects legacy entity tooltip lines from registered Waila providers. */
     public List<String> getLegacyEntityTooltips(Entity entity, DataAccessorCommon legacyAccessor) {
         List<String> legacyTooltips = new TipList<String, String>();
         try {
