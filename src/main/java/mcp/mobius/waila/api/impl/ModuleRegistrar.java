@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import mcp.mobius.waila.Waila;
 import mcp.mobius.waila.api.BackwardCompatibility;
 import mcp.mobius.waila.api.IWailaBlockDecorator;
 import mcp.mobius.waila.api.IWailaDataProvider;
@@ -47,6 +48,9 @@ public class ModuleRegistrar implements IWailaRegistrar {
     public LinkedHashMap<Class, HashSet<String>> syncedNBTKeys = new LinkedHashMap<>();
 
     public LinkedHashMap<String, String> IMCRequests = new LinkedHashMap<>();
+
+    /** Legacy tooltip renderers indexed by their Waila render token name. */
+    public LinkedHashMap<String, IWailaTooltipRenderer> tooltipRenderers = new LinkedHashMap<>();
 
     private ModuleRegistrar() {
         instance = this;
@@ -207,9 +211,20 @@ public class ModuleRegistrar implements IWailaRegistrar {
         this.syncedNBTKeys.get(target).add(key);
     }
 
+    /** Registers a legacy tooltip renderer unless the name is already in use. */
     @Deprecated
     @Override
-    public void registerTooltipRenderer(String name, IWailaTooltipRenderer renderer) {}
+    public void registerTooltipRenderer(String name, IWailaTooltipRenderer renderer) {
+        if (!this.tooltipRenderers.containsKey(name)) {
+            this.tooltipRenderers.put(name, renderer);
+        } else {
+            Waila.log.warn(
+                    String.format(
+                            "A renderer named %s already exists (Class : %s). Skipping new renderer.",
+                            name,
+                            renderer.getClass().getName()));
+        }
+    }
 
     /* PROVIDER GETTERS */
 
@@ -273,9 +288,10 @@ public class ModuleRegistrar implements IWailaRegistrar {
         return getProviders(name, this.FMPClassDecorators);
     }
 
+    /** Returns the legacy tooltip renderer registered for a token name. */
     @Deprecated
     public IWailaTooltipRenderer getTooltipRenderer(String name) {
-        return null;
+        return this.tooltipRenderers.get(name);
     }
 
     private <T> Map<Integer, List<T>> getProviders(Object obj, LinkedHashMap<Class, ArrayList<T>> target) {
