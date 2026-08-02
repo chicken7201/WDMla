@@ -60,8 +60,14 @@ public class DataProviderCompat {
                     if (dataProvider.hasWailaAdvancedBody(itemForm, legacyAccessor, config)) {
                         hasAdvancedBodyAvailable = true;
                         if (isAdvancedKeyDown) {
+                            int previousAdvancedSize = legacyTooltips.size();
                             legacyTooltips = dataProvider
                                     .getWailaAdvancedBody(itemForm, legacyTooltips, legacyAccessor, config);
+                            LegacyFluidStorageCompat.filterBody(
+                                    dataProvider,
+                                    legacyAccessor.getTileEntity(),
+                                    previousAdvancedSize,
+                                    legacyTooltips);
                         }
                     }
                 }

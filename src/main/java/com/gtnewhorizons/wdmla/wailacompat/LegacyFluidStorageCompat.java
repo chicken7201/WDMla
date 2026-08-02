@@ -2,6 +2,8 @@ package com.gtnewhorizons.wdmla.wailacompat;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.minecraftforge.common.util.ForgeDirection;
@@ -10,6 +12,8 @@ import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.fluids.IFluidTank;
 
 import com.gtnewhorizons.wdmla.config.General;
+
+import mcp.mobius.waila.api.SpecialChars;
 
 /** Removes legacy fluid text when the same storage is rendered by WDMla's modern fluid view. */
 public final class LegacyFluidStorageCompat {
@@ -31,7 +35,7 @@ public final class LegacyFluidStorageCompat {
             return;
         }
         if (isStandardFluidStorage(target)) {
-            tooltips.subList(start, tooltips.size()).removeIf(FLUID_CAPACITY_TEXT.asPredicate());
+            removeDuplicatedFluidRows(start, tooltips);
         }
     }
 
@@ -48,8 +52,45 @@ public final class LegacyFluidStorageCompat {
             }
             default -> {
                 if (isStandardFluidStorage(target)) {
-                    tooltips.subList(start, tooltips.size()).removeIf(FLUID_CAPACITY_TEXT.asPredicate());
+                    removeDuplicatedFluidRows(start, tooltips);
                 }
+            }
+        }
+    }
+
+    /** Removes legacy fluid text and waila.fluid tokens while preserving unrelated text on the same row. */
+    private static void removeDuplicatedFluidRows(int start, List<String> tooltips) {
+        ListIterator<String> iterator = tooltips.listIterator(start);
+        while (iterator.hasNext()) {
+            String tooltip = iterator.next();
+            if (tooltip == null) {
+                continue;
+            }
+            if (FLUID_CAPACITY_TEXT.matcher(tooltip).matches()) {
+                iterator.remove();
+                continue;
+            }
+
+            Matcher renderer = SpecialChars.patternRender.matcher(tooltip);
+            StringBuffer filtered = new StringBuffer();
+            boolean removedFluidRenderer = false;
+            while (renderer.find()) {
+                if ("waila.fluid".equalsIgnoreCase(renderer.group("name"))) {
+                    renderer.appendReplacement(filtered, "");
+                    removedFluidRenderer = true;
+                }
+            }
+            if (!removedFluidRenderer) {
+                continue;
+            }
+
+            renderer.appendTail(filtered);
+            String visibleText = SpecialChars.patternMinecraft.matcher(filtered.toString()).replaceAll("");
+            visibleText = SpecialChars.patternWaila.matcher(visibleText).replaceAll("").trim();
+            if (visibleText.isEmpty()) {
+                iterator.remove();
+            } else {
+                iterator.set(filtered.toString());
             }
         }
     }
