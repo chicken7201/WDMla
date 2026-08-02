@@ -27,6 +27,8 @@ import com.gtnewhorizons.wdmla.util.HotSwapUtil;
  */
 public class GuiBlockDraw {
 
+    private static final String RAILCRAFT_TANK_TILE = "mods.railcraft.common.blocks.machine.beta.TileTankBase";
+
     public BlockPos renderedBlock;
     private final Vector3f eyePos = new Vector3f(0, 0, -10f);
     private final Vector3f lookAt = new Vector3f(0, 0, 0);
@@ -171,7 +173,7 @@ public class GuiBlockDraw {
             int z = renderedBlock.z;
             setDefaultPassRenderState(finalPass);
             TileEntity tile = Minecraft.getMinecraft().theWorld.getTileEntity(x, y, z);
-            if (tile != null && tesr.hasSpecialRenderer(tile)) {
+            if (tile != null && shouldRenderTileEntityPreview(tile) && tesr.hasSpecialRenderer(tile)) {
                 if (tile.shouldRenderInPass(finalPass)) {
                     tesr.renderTileEntityAt(tile, x, y, z, 0);
                 }
@@ -181,6 +183,16 @@ public class GuiBlockDraw {
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         glDepthMask(true);
+    }
+
+    /** Excludes multiblock-wide Railcraft tank fluid TESRs from a one-block HUD model. */
+    private static boolean shouldRenderTileEntityPreview(TileEntity tile) {
+        for (Class<?> type = tile.getClass(); type != null; type = type.getSuperclass()) {
+            if (RAILCRAFT_TANK_TILE.equals(type.getName())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void renderBlocks(Tessellator tessellator, BlockPos blocksToRender) {

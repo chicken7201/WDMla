@@ -1,6 +1,9 @@
 package com.gtnewhorizons.wdmla.plugin.railcraft;
 
+import java.util.Collections;
 import java.util.List;
+
+import net.minecraftforge.fluids.FluidTankInfo;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -28,13 +31,22 @@ public enum RailcraftTankFluidProvider implements IServerExtensionProvider<Fluid
         if (!(target instanceof TileTankBase tankTile)) {
             return null;
         }
+        if (!tankTile.isStructureValid()) {
+            return Collections.emptyList();
+        }
         TileMultiBlock multiBlock = tankTile;
         if (multiBlock.getMasterBlock() instanceof TileTankBase master) {
             tankTile = master;
         }
         StandardTank tank = tankTile.getTank();
-        return tank == null ? null : CommonProxy.fromFluidStorage(new net.minecraftforge.fluids.FluidTankInfo[] {
-                tank.getInfo() });
+        if (tank == null) {
+            return Collections.emptyList();
+        }
+        FluidTankInfo tankInfo = tank.getInfo();
+        if (tankInfo == null || tankInfo.fluid == null || tankInfo.fluid.amount <= 0) {
+            return Collections.emptyList();
+        }
+        return CommonProxy.fromFluidStorage(new FluidTankInfo[] { tankInfo });
     }
 
     /** Uses the built-in FluidView client decoder. */
