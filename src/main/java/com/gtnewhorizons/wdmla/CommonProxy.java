@@ -16,6 +16,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.IFluidTank;
 
 import com.google.common.cache.Cache;
 import com.gtnewhorizons.wdmla.api.IWDMlaPlugin;
@@ -141,12 +142,19 @@ public class CommonProxy {
         return ItemCollector.EMPTY;
     }
 
+    /** Wraps standard Forge fluid handlers and tanks in WDMla's fluid storage view. */
     public static List<ViewGroup<FluidView.Data>> wrapFluidStorage(Accessor accessor) {
-        if (accessor instanceof BlockAccessor blockAccessor
-                && blockAccessor.getTileEntity() instanceof IFluidHandler fluidHandler) {
+        Object target = accessor.getTarget();
+        if (target instanceof IFluidHandler fluidHandler) {
             FluidTankInfo[] tankInfo = fluidHandler.getTankInfo(ForgeDirection.UNKNOWN);
             if (tankInfo != null) {
                 return fromFluidStorage(tankInfo);
+            }
+        }
+        if (target instanceof IFluidTank fluidTank) {
+            FluidTankInfo tankInfo = fluidTank.getInfo();
+            if (tankInfo != null) {
+                return fromFluidStorage(new FluidTankInfo[] { tankInfo });
             }
         }
         return null;

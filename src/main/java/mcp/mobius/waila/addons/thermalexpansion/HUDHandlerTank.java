@@ -15,6 +15,8 @@ import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.cbcore.LangUtil;
 import mcp.mobius.waila.utils.WailaExceptionHandler;
 
+import com.gtnewhorizons.wdmla.wailacompat.LegacyFluidRenderer;
+
 public class HUDHandlerTank implements IWailaDataProvider {
 
     @Override
@@ -58,7 +60,11 @@ public class HUDHandlerTank implements IWailaDataProvider {
                 Integer capacity = (Integer) ThermalExpansionModule.TileTank_getTankCapacity
                         .invoke(accessor.getTileEntity());
 
-                currenttip.add(String.format("%d / %d mB", amount, capacity));
+                if (!LegacyFluidRenderer.isHandledByModernProvider(accessor)) {
+                    FluidStack fluid = (FluidStack) ThermalExpansionModule.TileTank_getTankFluid
+                            .invoke(accessor.getTileEntity());
+                    currenttip.add(LegacyFluidRenderer.render(fluid, amount, capacity));
+                }
             }
 
             if (config.getConfig("thermalexpansion.tankmode")) {

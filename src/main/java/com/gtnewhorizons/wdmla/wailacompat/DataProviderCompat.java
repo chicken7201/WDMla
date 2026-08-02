@@ -50,7 +50,13 @@ public class DataProviderCompat {
             boolean isAdvancedKeyDown = KeyEvent.key_show_advanced.getIsKeyPressed();
             for (List<IWailaDataProvider> providersList : legacyBodyProviders.values()) {
                 for (IWailaDataProvider dataProvider : providersList) {
+                    int previousSize = legacyTooltips.size();
                     legacyTooltips = dataProvider.getWailaBody(itemForm, legacyTooltips, legacyAccessor, config);
+                    LegacyFluidStorageCompat.filterBody(
+                            dataProvider,
+                            legacyAccessor.getTileEntity(),
+                            previousSize,
+                            legacyTooltips);
                     if (dataProvider.hasWailaAdvancedBody(itemForm, legacyAccessor, config)) {
                         hasAdvancedBodyAvailable = true;
                         if (isAdvancedKeyDown) {
@@ -102,8 +108,14 @@ public class DataProviderCompat {
             for (List<IWailaEntityProvider> providersList : ModuleRegistrar.instance()
                     .getBodyEntityProviders(legacyAccessor.getEntity()).values()) {
                 for (IWailaEntityProvider dataProvider : providersList) {
+                    int previousSize = legacyTooltips.size();
                     legacyTooltips = dataProvider
                             .getWailaBody(entity, legacyTooltips, legacyAccessor, ConfigHandler.instance());
+                    LegacyFluidStorageCompat.filterBody(
+                            dataProvider,
+                            legacyAccessor.getEntity(),
+                            previousSize,
+                            legacyTooltips);
                 }
             }
 
