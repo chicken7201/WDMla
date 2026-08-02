@@ -15,13 +15,13 @@ public final class HexColorConfigElement extends DummyConfigElement<String> {
     private static final String TEXT_COLOR_PREFIX = "option.wdmla.general.textcolor.";
     private static final String PROGRESS_COLOR_PREFIX = "option.wdmla.general.progresscolor.";
 
-    private final IConfigElement<Integer> delegate;
+    private final IConfigElement<Object> delegate;
 
     /** Creates a hexadecimal GUI view backed by the original integer element. */
-    private HexColorConfigElement(IConfigElement<Integer> delegate) {
+    private HexColorConfigElement(IConfigElement<Object> delegate) {
         super(
                 delegate.getName(),
-                ConfigColorCodec.format((Integer) delegate.get()),
+                ConfigColorCodec.format(readInteger(delegate.get())),
                 ConfigGuiType.STRING,
                 delegate.getLanguageKey(),
                 ConfigColorCodec.INPUT_PATTERN);
@@ -33,9 +33,17 @@ public final class HexColorConfigElement extends DummyConfigElement<String> {
     public static List<IConfigElement> wrapColorElements(List<IConfigElement> elements) {
         List<IConfigElement> wrapped = new ArrayList<>(elements.size());
         for (IConfigElement element : elements) {
-            wrapped.add(isColorElement(element) ? new HexColorConfigElement((IConfigElement<Integer>) element) : element);
+            wrapped.add(isColorElement(element) ? new HexColorConfigElement((IConfigElement<Object>) element) : element);
         }
         return wrapped;
+    }
+
+    /** Reads Forge's string-backed integer elements without assuming their runtime value type. */
+    private static int readInteger(Object rawValue) {
+        if (rawValue instanceof Number number) {
+            return number.intValue();
+        }
+        return Integer.decode(String.valueOf(rawValue));
     }
 
     /** Identifies integer properties belonging to WDMla's configurable color groups. */
@@ -68,14 +76,14 @@ public final class HexColorConfigElement extends DummyConfigElement<String> {
     /** Returns the original default converted to hexadecimal GUI text. */
     @Override
     public Object getDefault() {
-        return ConfigColorCodec.format((Integer) delegate.getDefault());
+        return ConfigColorCodec.format(readInteger(delegate.getDefault()));
     }
 
     /** Restores the integer default and refreshes the displayed hexadecimal value. */
     @Override
     public void setToDefault() {
-        delegate.set((Integer) delegate.getDefault());
-        value = ConfigColorCodec.format((Integer) delegate.get());
+        delegate.set(readInteger(delegate.getDefault()));
+        value = ConfigColorCodec.format(readInteger(delegate.get()));
     }
 
     /** Preserves the original world-restart requirement. */
