@@ -38,6 +38,11 @@ public enum PluginScanner {
                 Waila.log.info(String.format("skipped plugin %s loading: missing dependency", uid));
                 continue;
             }
+            List<String> excludedDeps = (List<String>) annotationInfo.get("excludedDependencies");
+            if (anyModsLoaded(excludedDeps)) {
+                Waila.log.info(String.format("skipped plugin %s loading: excluded dependency loaded", uid));
+                continue;
+            }
             String overridingMethod = (String) annotationInfo.get("overridingRegistrationMethodName");
             if (!Strings.isNullOrEmpty(overridingMethod)) {
                 blackListedRegistrationMethods.add(overridingMethod);
@@ -72,5 +77,18 @@ public enum PluginScanner {
             }
         }
         return true;
+    }
+
+    /** Returns whether at least one listed mod is loaded. */
+    private boolean anyModsLoaded(Iterable<String> mods) {
+        if (mods == null) {
+            return false;
+        }
+        for (String mod : mods) {
+            if (Loader.isModLoaded(mod)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
