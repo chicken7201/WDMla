@@ -7,6 +7,12 @@ import net.minecraftforge.event.world.WorldEvent;
 
 import com.gtnewhorizons.wdmla.api.Mods;
 import com.gtnewhorizons.wdmla.impl.ui.drawable.BreakProgressDrawable;
+import com.gtnewhorizons.wdmla.wailacompat.ModernRendererAdapter;
+import com.gtnewhorizons.wdmla.wailacompat.parser.AspectArgsParser;
+import com.gtnewhorizons.wdmla.wailacompat.parser.EnergyArgsParser;
+import com.gtnewhorizons.wdmla.wailacompat.parser.FluidArgsParser;
+import com.gtnewhorizons.wdmla.wailacompat.parser.HealthArgsParser;
+import com.gtnewhorizons.wdmla.wailacompat.parser.ProgressArgsParser;
 
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -40,7 +46,17 @@ public class ProxyClient extends ProxyServer {
         ModuleRegistrar.instance().addConfig("General", "general.showents");
         ModuleRegistrar.instance().addConfig("General", "general.showhp");
         ModuleRegistrar.instance().addConfig("General", "general.showcrop");
+        ModuleRegistrar.instance()
+                .registerTooltipRenderer("waila.health", new ModernRendererAdapter(new HealthArgsParser()));
         ModuleRegistrar.instance().registerTooltipRenderer("waila.stack", new TTRenderStack());
+        ModuleRegistrar.instance()
+                .registerTooltipRenderer("waila.progress", new ModernRendererAdapter(new ProgressArgsParser()));
+        ModuleRegistrar.instance()
+                .registerTooltipRenderer("waila.fluid", new ModernRendererAdapter(new FluidArgsParser()));
+        ModuleRegistrar.instance()
+                .registerTooltipRenderer("waila.rfenergy", new ModernRendererAdapter(new EnergyArgsParser()));
+        ModuleRegistrar.instance()
+                .registerTooltipRenderer("waila.tcaspect", new ModernRendererAdapter(new AspectArgsParser()));
 
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
         MinecraftForge.EVENT_BUS.register(new BlockBreakEventHandler());

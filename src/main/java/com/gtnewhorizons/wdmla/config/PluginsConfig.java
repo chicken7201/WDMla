@@ -133,7 +133,8 @@ public class PluginsConfig {
 
             @Config.LangKey("option.wdmla.universal.fluid.mode")
             @Config.DefaultEnum("GAUGE")
-            public Mode mode;
+            @Config.Comment("GAUGE: textured fill bar, ICON_TEXT: fluid icon with text, TEXT: text only")
+            public Mode mode = Mode.GAUGE;
 
             @Config.LangKey("option.wdmla.universal.fluid.normal.amount")
             @Config.DefaultInt(4)

@@ -17,20 +17,24 @@ import net.minecraft.world.World;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
+import mcp.mobius.waila.api.SpecialChars;
 
 public class HUDHandlerIAspectContainer implements IWailaDataProvider {
 
+    /** Leaves the target stack unchanged for Thaumcraft aspect containers. */
     @Override
     public ItemStack getWailaStack(IWailaDataAccessor accessor, IWailaConfigHandler config) {
         return null;
     }
 
+    /** Leaves the tooltip header unchanged because aspects are body information. */
     @Override
     public List<String> getWailaHead(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
             IWailaConfigHandler config) {
         return currenttip;
     }
 
+    /** Adds each known or unknown aspect as a modern-renderable Waila aspect token. */
     @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
             IWailaConfigHandler config) {
@@ -49,9 +53,10 @@ public class HUDHandlerIAspectContainer implements IWailaDataProvider {
                 String aspect = subtag.getString("key");
                 String amount = String.valueOf(subtag.getInteger("value"));
 
-                if (!aspect.equals("???"))
-                    currenttip.add(String.format("%s" + TAB + ALIGNRIGHT + WHITE + "%s", aspect, amount));
-                else unknownAspects.add(String.format("%s" + TAB + ALIGNRIGHT + WHITE + "%s", aspect, amount));
+                if (!aspect.equals("???")) currenttip.add(
+                        SpecialChars.getRenderString("waila.tcaspect", aspect) + TAB + ALIGNRIGHT + WHITE + amount);
+                else unknownAspects.add(
+                        SpecialChars.getRenderString("waila.tcaspect", aspect) + TAB + ALIGNRIGHT + WHITE + amount);
             }
 
             currenttip.addAll(unknownAspects);
@@ -60,12 +65,14 @@ public class HUDHandlerIAspectContainer implements IWailaDataProvider {
         return currenttip;
     }
 
+    /** Leaves the tooltip footer unchanged because aspects are body information. */
     @Override
     public List<String> getWailaTail(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
             IWailaConfigHandler config) {
         return currenttip;
     }
 
+    /** Serializes the aspects visible through the player's revealing goggles. */
     @SuppressWarnings("unchecked")
     @Override
     public NBTTagCompound getNBTData(EntityPlayerMP player, TileEntity te, NBTTagCompound tag, World world, int x,
@@ -77,7 +84,7 @@ public class HUDHandlerIAspectContainer implements IWailaDataProvider {
 
             ItemStack headSlot = player.inventory.armorInventory[3];
             if (headSlot == null) return tag;
-            boolean hasReveal = ThaumcraftModule.IGoggles.isInstance(headSlot.getItem());
+            boolean hasReveal = ThaumcraftModule.isGoggles.apply(headSlot);
             if (!hasReveal) return tag;
 
             Map<String, ?> knownAspects = (Map<String, ?>) ThaumcraftModule.CommonProxy_getKnownAspects
@@ -98,7 +105,7 @@ public class HUDHandlerIAspectContainer implements IWailaDataProvider {
                 if (tileAspects.get(o) > 0) {
                     if (playerAspects.containsKey(o)) {
                         NBTTagCompound cmptag = new NBTTagCompound();
-                        cmptag.setString("key", (String) ThaumcraftModule.Aspect_getName.invoke(o));
+                        cmptag.setString("key", (String) ThaumcraftModule.Aspect_tag.get(o));
                         cmptag.setInteger("value", tileAspects.get(o));
                         aspects.appendTag(cmptag);
                     } else {

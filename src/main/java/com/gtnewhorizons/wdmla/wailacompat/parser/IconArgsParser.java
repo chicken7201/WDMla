@@ -7,6 +7,7 @@ import com.gtnewhorizons.wdmla.overlay.VanillaUIIcons;
 
 public class IconArgsParser implements ITTRenderParser {
 
+    /** Maps a legacy Waila symbol to its modern vanilla icon component. */
     @Override
     public Component parse(String[] args) {
         VanillaUIIcons iconUI = switch (args[0]) {

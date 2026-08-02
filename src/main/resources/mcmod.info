@@ -5,7 +5,7 @@
       "modid": "Waila",
       "name": "Waila",
       "description": "All your data are belong to us.",
-      "version": "${modVersion}",
+      "version": "1.19.31",
       "mcversion": "${minecraftVersion}",
       "url": "",
       "updateUrl": "",

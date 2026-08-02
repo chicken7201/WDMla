@@ -14,6 +14,7 @@ import mcp.mobius.waila.api.ITaggedList;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
+import mcp.mobius.waila.api.SpecialChars;
 import mcp.mobius.waila.utils.WailaExceptionHandler;
 
 public class HUDHandlerIEnergyHandler implements IWailaDataProvider {
@@ -25,17 +26,21 @@ public class HUDHandlerIEnergyHandler implements IWailaDataProvider {
         energyFormat.setMaximumFractionDigits(0);
     }
 
+    /** Leaves the target stack unchanged for RF energy providers. */
     @Override
     public ItemStack getWailaStack(IWailaDataAccessor accessor, IWailaConfigHandler config) {
         return null;
     }
 
+    /** Leaves the tooltip header unchanged because RF storage is body information. */
     @Override
     public List<String> getWailaHead(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
             IWailaConfigHandler config) {
         return currenttip;
     }
 
+    /** Adds the configured modern RF bar or the legacy numeric RF text. */
+    @SuppressWarnings("unchecked")
     @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
             IWailaConfigHandler config) {
@@ -43,20 +48,30 @@ public class HUDHandlerIEnergyHandler implements IWailaDataProvider {
         if (!config.getConfig("thermalexpansion.energyhandler")) return currenttip;
         if (!accessor.getNBTData().hasKey("Energy")) return currenttip;
 
-        int energy = accessor.getNBTInteger(accessor.getNBTData(), "Energy");
-        int maxEnergy = accessor.getNBTInteger(accessor.getNBTData(), "MaxStorage");
+        if (!accessor.getNBTData().hasKey("MaxStorage")) return currenttip;
         try {
-            if ((maxEnergy != 0) && (((ITaggedList) currenttip).getEntries("RFEnergyStorage").size() == 0)) {
-                if (!config.getConfig("thermalexpansion.digitgrouping")) {
-                    ((ITaggedList) currenttip).add(String.format("%d / %d RF", energy, maxEnergy), "RFEnergyStorage");
-                } else {
-                    ((ITaggedList) currenttip).add(
-                        String.format(
-                            "%s / %s RF", 
-                            energyFormat.format(energy), 
-                            energyFormat.format(maxEnergy)
-                        ), 
-                        "RFEnergyStorage");
+            if (currenttip instanceof ITaggedList) {
+                ITaggedList<String, String> taggedTips = (ITaggedList<String, String>) currenttip;
+                int energy = accessor.getNBTInteger(accessor.getNBTData(), "Energy");
+                int maxEnergy = accessor.getNBTInteger(accessor.getNBTData(), "MaxStorage");
+                if (maxEnergy > 0 && taggedTips.getEntries("RFEnergyStorage").isEmpty()) {
+                    if (config.getConfig("thermalexpansion.rfenergybar")) {
+                        taggedTips.add(
+                                SpecialChars.getRenderString(
+                                        "waila.rfenergy",
+                                        String.valueOf(energy),
+                                        String.valueOf(maxEnergy)),
+                                "RFEnergyStorage");
+                    } else if (!config.getConfig("thermalexpansion.digitgrouping")) {
+                        taggedTips.add(String.format("%d / %d RF", energy, maxEnergy), "RFEnergyStorage");
+                    } else {
+                        taggedTips.add(
+                                String.format(
+                                        "%s / %s RF",
+                                        energyFormat.format(energy),
+                                        energyFormat.format(maxEnergy)),
+                                "RFEnergyStorage");
+                    }
                 }
             }
         } catch (Exception e) {
@@ -66,12 +81,14 @@ public class HUDHandlerIEnergyHandler implements IWailaDataProvider {
         return currenttip;
     }
 
+    /** Leaves the tooltip footer unchanged because RF storage is body information. */
     @Override
     public List<String> getWailaTail(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
             IWailaConfigHandler config) {
         return currenttip;
     }
 
+    /** Synchronizes the current and maximum RF storage values to the client tooltip. */
     @Override
     public NBTTagCompound getNBTData(EntityPlayerMP player, TileEntity te, NBTTagCompound tag, World world, int x,
             int y, int z) {

@@ -34,8 +34,11 @@ import mcp.mobius.waila.overlay.DecoratorRenderer;
 import mcp.mobius.waila.server.ProxyServer;
 import mcp.mobius.waila.utils.ModIdentification;
 
-@Mod(modid = "Waila", name = "Waila", version = Tags.GRADLETOKEN_VERSION, acceptableRemoteVersions = "*")
+@Mod(modid = "Waila", name = "Waila", version = Waila.COMPATIBILITY_VERSION, acceptableRemoteVersions = "*")
 public class Waila {
+
+    /** Version exposed to mods that depend on the bundled GTNH Waila implementation. */
+    public static final String COMPATIBILITY_VERSION = "1.19.31";
 
     // The instance of your mod that Forge uses.
     @Instance("Waila")
