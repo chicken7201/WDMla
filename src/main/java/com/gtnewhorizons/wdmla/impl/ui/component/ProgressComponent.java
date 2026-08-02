@@ -15,7 +15,7 @@ import com.gtnewhorizons.wdmla.impl.ui.sizer.Area;
 import com.gtnewhorizons.wdmla.impl.ui.sizer.Padding;
 import com.gtnewhorizons.wdmla.impl.ui.sizer.Size;
 import com.gtnewhorizons.wdmla.impl.ui.style.RectStyle;
-import com.gtnewhorizons.wdmla.impl.ui.value.FilledProgress;
+import com.gtnewhorizons.wdmla.impl.ui.value.ProgressAnimationTracker;
 
 import mcp.mobius.waila.utils.WailaExceptionHandler;
 
@@ -35,7 +35,7 @@ public class ProgressComponent extends TooltipComponent {
                 new ArrayList<>(),
                 new Padding(),
                 new Size(MINIMAL_W, MINIMAL_H),
-                new ProgressDrawable(new FilledProgress(current, max)));
+                new ProgressDrawable(ProgressAnimationTracker.track(current, max)));
         this.rectStyle = new RectStyle().backgroundColor(General.progressColor.background)
                 .borderColor(General.progressColor.border);
         this.rectDrawable = new RectDrawable().style(rectStyle);

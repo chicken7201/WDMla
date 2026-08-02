@@ -32,6 +32,7 @@ import com.gtnewhorizons.wdmla.impl.ui.sizer.Area;
 import com.gtnewhorizons.wdmla.impl.ui.sizer.Size;
 import com.gtnewhorizons.wdmla.impl.ui.style.TextStyle;
 import com.gtnewhorizons.wdmla.impl.ui.value.HUDRenderArea;
+import com.gtnewhorizons.wdmla.impl.ui.value.ProgressAnimationTracker;
 
 import cpw.mods.fml.client.config.GuiConfig;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -187,7 +188,12 @@ public class WDMlaTickHandler {
             return null;
         }
 
-        handler.gatherComponents(accessor, $ -> root);
+        ProgressAnimationTracker.beginFrame(accessor.getTarget());
+        try {
+            handler.gatherComponents(accessor, $ -> root);
+        } finally {
+            ProgressAnimationTracker.endFrame();
+        }
 
         return root;
     }
