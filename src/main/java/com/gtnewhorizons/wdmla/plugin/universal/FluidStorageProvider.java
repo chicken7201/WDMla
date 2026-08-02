@@ -92,8 +92,13 @@ public class FluidStorageProvider<T extends Accessor> implements IComponentProvi
             return;
         }
 
-        boolean renderGroup = groups.size() > 1 || groups.get(0).shouldRenderGroup();
-        ClientViewGroup.tooltip(tooltip, groups, renderGroup, (theTooltip, group) -> {
+        List<ClientViewGroup<FluidView>> visibleGroups = visibleGroups(groups, accessor.showDetails());
+        if (visibleGroups.isEmpty()) {
+            return;
+        }
+
+        boolean renderGroup = visibleGroups.size() > 1 || visibleGroups.get(0).shouldRenderGroup();
+        ClientViewGroup.tooltip(tooltip, visibleGroups, renderGroup, (theTooltip, group) -> {
             if (renderGroup) {
                 group.renderHeader(theTooltip);
             }
@@ -115,6 +120,40 @@ public class FluidStorageProvider<T extends Accessor> implements IComponentProvi
                 }
             }
         });
+    }
+
+    /** Hides empty tanks normally while retaining the complete group metadata for detailed display. */
+    private static List<ClientViewGroup<FluidView>> visibleGroups(List<ClientViewGroup<FluidView>> groups,
+            boolean showDetails) {
+        if (showDetails) {
+            return groups;
+        }
+
+        List<ClientViewGroup<FluidView>> visibleGroups = new ArrayList<>();
+        for (ClientViewGroup<FluidView> group : groups) {
+            List<FluidView> visibleViews = new ArrayList<>();
+            for (FluidView view : group.views) {
+                if (!isEmptyTank(view)) {
+                    visibleViews.add(view);
+                }
+            }
+            if (visibleViews.isEmpty()) {
+                continue;
+            }
+
+            ClientViewGroup<FluidView> visibleGroup = new ClientViewGroup<>(visibleViews);
+            visibleGroup.title = group.title;
+            visibleGroup.messageType = group.messageType;
+            visibleGroup.boxProgress = group.boxProgress;
+            visibleGroup.extraData = group.extraData;
+            visibleGroups.add(visibleGroup);
+        }
+        return visibleGroups;
+    }
+
+    /** Detects a decoded tank that has capacity but currently contains no fluid. */
+    private static boolean isEmptyTank(FluidView view) {
+        return view.current <= 0L;
     }
 
     /** Resolves the configured display mode, with a safe gauge fallback for missing config values. */
