@@ -23,6 +23,36 @@ public class PluginsConfig {
 
     public static final Debug debug = new Debug();
 
+    public static final WailaPlugins wailaPlugins = new WailaPlugins();
+
+    @Config.LangKey("provider.wdmla.wailaplugins.category")
+    public static class WailaPlugins {
+
+        public final BloodMagic bloodMagic = new BloodMagic();
+        public final Railcraft railcraft = new Railcraft();
+
+        @Config.LangKey("provider.wdmla.bloodmagic.category")
+        public static class BloodMagic {
+
+            @Config.DefaultInt(1)
+            @Config.RangeInt(min = 0, max = 2)
+            @Config.Comment("0: no sigil required, 1: sigil in inventory, 2: sigil in hand")
+            public int sigilRequirement;
+
+            @Config.DefaultBoolean(true)
+            @Config.Comment("Sigil of Sight reveals altar progress beyond the Divination Sigil")
+            public boolean seerBenefit;
+        }
+
+        @Config.LangKey("provider.wdmla.railcraft.category")
+        public static class Railcraft {
+
+            @Config.DefaultBoolean(true)
+            @Config.Comment("Require the Railcraft Electric Meter in hand before showing charge")
+            public boolean meterInHand;
+        }
+    }
+
     @Config.LangKey("provider.wdmla.core.category")
     public static class Core {
 

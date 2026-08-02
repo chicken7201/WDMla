@@ -25,6 +25,7 @@ import com.gtnewhorizons.wdmla.overlay.WDMlaTickHandler;
 import com.gtnewhorizons.wdmla.plugin.harvestability.proxy.ProxyGregTech;
 import com.gtnewhorizons.wdmla.plugin.harvestability.proxy.ProxyIguanaTweaks;
 import com.gtnewhorizons.wdmla.plugin.harvestability.proxy.ProxyTinkersConstruct;
+import com.gtnewhorizons.wdmla.plugin.wawla.WawlaItemTooltipHandler;
 
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -50,6 +51,7 @@ public class ClientProxy extends CommonProxy {
         WDMlaTickHandler tickHandler = new WDMlaTickHandler();
         FMLCommonHandler.instance().bus().register(tickHandler);
         MinecraftForge.EVENT_BUS.register(tickHandler);
+        MinecraftForge.EVENT_BUS.register(WawlaItemTooltipHandler.INSTANCE);
         FMLCommonHandler.instance().bus().register(this);
         ClientCommandHandler.instance.registerCommand(new GenerateDumpCommand());
         if (WDMla.isDevEnv()) {
