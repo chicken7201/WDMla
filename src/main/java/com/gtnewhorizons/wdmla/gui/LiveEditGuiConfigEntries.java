@@ -34,7 +34,7 @@ public class LiveEditGuiConfigEntries extends GuiConfigEntries {
         protected GuiScreen buildChildScreen() {
             return new LiveEditGuiConfig(
                     this.owningScreen,
-                    this.configElement.getChildElements(),
+                    HexColorConfigElement.wrapColorElements(this.configElement.getChildElements()),
                     this.owningScreen.modID,
                     owningScreen.allRequireWorldRestart || this.configElement.requiresWorldRestart(),
                     owningScreen.allRequireMcRestart || this.configElement.requiresMcRestart(),
