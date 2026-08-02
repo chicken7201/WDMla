@@ -177,12 +177,11 @@ public class ThemeHelper {
                     hPanel.item(inputStack);
                 }
             }
-            float ratio = (float) currentProgress / maxProgress;
             hPanel.padding(new Padding().horizontal(2)).child(
                     new IconComponent(WDMlaUIIcons.FURNACE_BG, WDMlaUIIcons.FURNACE_BG.texPath).padding(new Padding())
                             .child(
                                     new IconComponent(WDMlaUIIcons.FURNACE, WDMlaUIIcons.FURNACE.texPath)
-                                            .clip(0f, 0f, ratio, 1f).padding(new Padding())));
+                                            .clipProgress(currentProgress, maxProgress).padding(new Padding())));
             for (ItemStack outputStack : output) {
                 if (outputStack != null) {
                     hPanel.item(outputStack);

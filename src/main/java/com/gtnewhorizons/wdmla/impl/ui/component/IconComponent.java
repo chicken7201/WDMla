@@ -8,6 +8,7 @@ import net.minecraft.util.ResourceLocation;
 import com.gtnewhorizons.wdmla.impl.ui.drawable.IconDrawable;
 import com.gtnewhorizons.wdmla.impl.ui.sizer.Padding;
 import com.gtnewhorizons.wdmla.impl.ui.sizer.Size;
+import com.gtnewhorizons.wdmla.impl.ui.value.ProgressAnimationTracker;
 
 public class IconComponent extends TooltipComponent {
 
@@ -21,6 +22,14 @@ public class IconComponent extends TooltipComponent {
 
     public IconComponent clip(float suRatio, float svRatio, float twRatio, float thRatio) {
         ((IconDrawable) foreground).clip(suRatio, svRatio, twRatio, thRatio);
+        return this;
+    }
+
+    /** Clips this icon horizontally using the shared smooth progress tracker. */
+    public IconComponent clipProgress(long current, long maximum) {
+        long safeMaximum = Math.max(1L, maximum);
+        long safeCurrent = Math.max(0L, Math.min(current, safeMaximum));
+        ((IconDrawable) foreground).clipProgress(ProgressAnimationTracker.track(safeCurrent, safeMaximum));
         return this;
     }
 }
