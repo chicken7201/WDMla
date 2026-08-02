@@ -12,6 +12,9 @@ dependencies {
     compileOnly("com.github.GTNewHorizons:StorageDrawers:2.2.20-GTNH:dev") {transitive = false}
     compileOnly("com.github.GTNewHorizons:ForestryMC:4.11.14:dev") {transitive = false}
     compileOnly("com.github.GTNewHorizons:ArchitectureCraft:1.12.10:dev") {transitive = false}
+    compileOnly("net.industrial-craft:industrialcraft-2:2.2.828-experimental:dev") {transitive = false}
+    compileOnly("com.github.GTNewHorizons:Railcraft:9.17.0:dev") {transitive = false}
+    compileOnly("com.github.GTNewHorizons:BloodMagic:1.8.5:dev") {transitive = false}
 //    compileOnly fileTree(dir: 'run/mods', include: ['blockrenderer*.jar'])
 
 //    api("com.github.GTNewHorizons:Angelica:2.1.19:dev")

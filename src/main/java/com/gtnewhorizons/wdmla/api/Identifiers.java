@@ -35,6 +35,7 @@ public final class Identifiers {
     public static final ResourceLocation ENCHANTMENT_POWER = Core("enchantment_power");
     public static final ResourceLocation STATUS_EFFECT = Core("status_effect");
     public static final ResourceLocation BREAK_PROGRESS_TEXT = Core("break_progress_text");
+    public static final ResourceLocation LIGHT_LEVEL = Core("light_level");
     public static final ResourceLocation HIDE_FANCY_ICON = Core("hide_fancy_icon");
 
     public static final ResourceLocation ITEM_STORAGE = Universal("item_storage");

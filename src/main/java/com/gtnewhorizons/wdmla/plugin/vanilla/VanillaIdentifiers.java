@@ -28,6 +28,7 @@ public class VanillaIdentifiers {
     public static final ResourceLocation PRIMED_TNT = MC("primed_tnt");
     public static final ResourceLocation ITEM_FRAME = MC("item_frame");
     public static final ResourceLocation VILLAGER_PROFESSION = MC("villager_profession");
+    public static final ResourceLocation WITCH_PROFESSION = MC("witch_profession");
     public static final ResourceLocation COMMAND_BLOCK = MC("command_block");
     public static final ResourceLocation FALLING_BLOCK_HEADER = MC("falling_block_header");
     public static final ResourceLocation FLOWER_POT_HEADER = MC("flower_pot_header");
