@@ -12,14 +12,17 @@ import mcp.mobius.waila.utils.WailaExceptionHandler;
 public class GregTechStoragePlugin implements IWDMlaPlugin {
 
     private static final String BASE_META_TILE_ENTITY = "gregtech.api.metatileentity.BaseMetaTileEntity";
+    private static final String BASE_META_PIPE_ENTITY = "gregtech.api.metatileentity.BaseMetaPipeEntity";
 
-    /** Registers GregTech item inventories and fluid tanks on the common side. */
+    /** Registers GregTech machine inventories plus machine and pipe fluid storage on the common side. */
     @Override
     public void register(IWDMlaCommonRegistration registration) {
         try {
             Class<?> baseMetaTileEntity = Class.forName(BASE_META_TILE_ENTITY);
+            Class<?> baseMetaPipeEntity = Class.forName(BASE_META_PIPE_ENTITY);
             registration.registerItemStorage(GregTechItemStorageProvider.INSTANCE, baseMetaTileEntity);
             registration.registerFluidStorage(FluidStorageProvider.Extension.INSTANCE, baseMetaTileEntity);
+            registration.registerFluidStorage(FluidStorageProvider.Extension.INSTANCE, baseMetaPipeEntity);
         } catch (ClassNotFoundException exception) {
             WailaExceptionHandler.handleErr(exception, getClass().getName(), null);
         }

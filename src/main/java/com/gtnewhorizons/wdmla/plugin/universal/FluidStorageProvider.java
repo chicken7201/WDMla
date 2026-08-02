@@ -49,6 +49,11 @@ import com.gtnewhorizons.wdmla.util.FormatUtil;
 
 public class FluidStorageProvider<T extends Accessor> implements IComponentProvider<T>, IServerDataProvider<T> {
 
+    private static final String GREGTECH_BASE_META_TILE_ENTITY =
+            "gregtech.api.metatileentity.BaseMetaTileEntity";
+    private static final String GREGTECH_BASE_META_PIPE_ENTITY =
+            "gregtech.api.metatileentity.BaseMetaPipeEntity";
+
     public static ForBlock getBlock() {
         return ForBlock.INSTANCE;
     }
@@ -83,7 +88,7 @@ public class FluidStorageProvider<T extends Accessor> implements IComponentProvi
 
     /** Adds configured fluid storage rows to the supplied tooltip. */
     public void append(ITooltip tooltip, T accessor, List<ClientViewGroup<FluidView>> groups) {
-        if (!accessor.showDetails() && PluginsConfig.universal.fluidStorage.detailed) {
+        if (!accessor.showDetails() && isDetailsOnly(accessor)) {
             return;
         }
 
@@ -241,9 +246,25 @@ public class FluidStorageProvider<T extends Accessor> implements IComponentProvi
 
     @Override
     public boolean shouldRequestData(T accessor) {
-        return (accessor.showDetails() || !PluginsConfig.universal.fluidStorage.detailed)
+        return (accessor.showDetails() || !isDetailsOnly(accessor))
                 && accessor.getTarget() != null
                 && !WDMlaCommonRegistration.instance().fluidStorageProviders.wrappedGet(accessor).isEmpty();
+    }
+
+    /** Keeps GregTech machine and pipe tanks visible normally while honoring Detailed-Only for other integrations. */
+    private static boolean isDetailsOnly(Accessor accessor) {
+        return PluginsConfig.universal.fluidStorage.detailed && !isGregTechMetaTile(accessor.getTarget());
+    }
+
+    /** Detects GregTech's machine and pipe wrappers without loading GregTech classes when the mod is absent. */
+    private static boolean isGregTechMetaTile(@Nullable Object target) {
+        for (Class<?> type = target == null ? null : target.getClass(); type != null; type = type.getSuperclass()) {
+            String className = type.getName();
+            if (GREGTECH_BASE_META_TILE_ENTITY.equals(className) || GREGTECH_BASE_META_PIPE_ENTITY.equals(className)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public enum Extension
