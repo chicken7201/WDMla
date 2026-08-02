@@ -6,6 +6,7 @@ import com.gtnewhorizons.wdmla.impl.ui.component.HealthComponent;
 
 public class HealthArgsParser implements ITTRenderParser {
 
+    /** Converts Waila's health token into the modern heart-grid component. */
     @Override
     public Component parse(String[] args) {
         float maxHeartsPerLine = Float.parseFloat(args[0]); // for some reason, old api accepts float

@@ -50,6 +50,7 @@ public class ThermalExpansionModule {
 
     public static Method IBlockInfo_getBlockInfo = null;
 
+    /** Discovers Thermal Expansion hooks and registers their Waila data providers. */
     public static void register() {
         boolean printedThermalExpansionNotFound = false;
         // XXX : We register the Energy interface first
@@ -67,6 +68,7 @@ public class ThermalExpansionModule {
             IEnergyInfo_getCurStorage = IEnergyInfo.getMethod("getInfoEnergyStored");
 
             ModuleRegistrar.instance().addConfigRemote("Thermal Expansion", "thermalexpansion.energyhandler");
+            ModuleRegistrar.instance().addConfigRemote("Thermal Expansion", "thermalexpansion.rfenergybar");
             ModuleRegistrar.instance().addConfigRemote("Thermal Expansion", "thermalexpansion.digitgrouping", false);
             ModuleRegistrar.instance().registerBodyProvider(new HUDHandlerIEnergyHandler(), IEnergyProvider);
             ModuleRegistrar.instance().registerNBTProvider(new HUDHandlerIEnergyHandler(), IEnergyProvider);

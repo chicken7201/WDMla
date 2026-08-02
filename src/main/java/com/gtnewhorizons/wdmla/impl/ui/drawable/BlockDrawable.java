@@ -1,7 +1,5 @@
 package com.gtnewhorizons.wdmla.impl.ui.drawable;
 
-import net.minecraft.client.Minecraft;
-
 import com.gtnewhorizons.wdmla.api.ui.IDrawable;
 import com.gtnewhorizons.wdmla.api.ui.sizer.IArea;
 import com.gtnewhorizons.wdmla.config.PluginsConfig;
@@ -14,23 +12,26 @@ public class BlockDrawable implements IDrawable {
     private static final float SIZE_MULTIPLIER = 1.5f;
 
     protected static float rotationPitch = 30f;
-    protected static long lastTime;
 
     private final int blockX;
     private final int blockY;
     private final int blockZ;
 
+    /** Stores the world coordinates rendered by this block model component. */
     public BlockDrawable(int blockX, int blockY, int blockZ) {
         this.blockX = blockX;
         this.blockY = blockY;
         this.blockZ = blockZ;
     }
 
+    /** Advances the shared block-model rotation for one actively targeted client tick. */
+    public static void advanceRotation() {
+        rotationPitch += PluginsConfig.core.defaultBlock.rendererRotationSpeed;
+    }
+
+    /** Renders the selected world block using the rotation accumulated only while targeting blocks. */
     @Override
     public void draw(IArea area) {
-        // TODO: get RenderPartialTick
-        rotationPitch += (Minecraft.getMinecraft().theWorld.getTotalWorldTime() - lastTime)
-                * PluginsConfig.core.defaultBlock.rendererRotationSpeed;
         // custom viewport is unaffected by GLScalef
         GuiBlockDraw.drawWorldBlock(
                 (int) ((area.getX() - area.getW() * (SIZE_MULTIPLIER - 1) / 2) * OverlayConfig.scale),
@@ -42,6 +43,5 @@ public class BlockDrawable implements IDrawable {
                 blockZ,
                 30f,
                 rotationPitch);
-        lastTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
     }
 }

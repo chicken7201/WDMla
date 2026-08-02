@@ -10,12 +10,19 @@ import java.util.regex.Pattern;
 
 import com.gtnewhorizons.wdmla.api.ITTRenderParser;
 import com.gtnewhorizons.wdmla.api.ui.ITooltip;
+import com.gtnewhorizons.wdmla.impl.ui.component.Component;
 import com.gtnewhorizons.wdmla.impl.ui.component.VPanelComponent;
+import com.gtnewhorizons.wdmla.wailacompat.parser.AspectArgsParser;
+import com.gtnewhorizons.wdmla.wailacompat.parser.EnergyArgsParser;
+import com.gtnewhorizons.wdmla.wailacompat.parser.FluidArgsParser;
+import com.gtnewhorizons.wdmla.wailacompat.parser.GTProgressArgsParser;
 import com.gtnewhorizons.wdmla.wailacompat.parser.HealthArgsParser;
 import com.gtnewhorizons.wdmla.wailacompat.parser.IconArgsParser;
 import com.gtnewhorizons.wdmla.wailacompat.parser.ItemArgsParser;
 import com.gtnewhorizons.wdmla.wailacompat.parser.ProgressArgsParser;
 
+import mcp.mobius.waila.api.IWailaTooltipRenderer;
+import mcp.mobius.waila.api.impl.ModuleRegistrar;
 import mcp.mobius.waila.overlay.DisplayUtil;
 
 /**
@@ -26,8 +33,13 @@ public class TooltipCompat {
     private final ITTRenderParser healthParser = new HealthArgsParser();
     private final ITTRenderParser itemParser = new ItemArgsParser();
     private final ITTRenderParser progressParser = new ProgressArgsParser();
+    private final ITTRenderParser fluidParser = new FluidArgsParser();
+    private final ITTRenderParser energyParser = new EnergyArgsParser();
+    private final ITTRenderParser aspectParser = new AspectArgsParser();
+    private final ITTRenderParser gtProgressParser = new GTProgressArgsParser();
     private final ITTRenderParser iconParser = new IconArgsParser();
 
+    /** Converts every legacy Waila row into modern WDMla components. */
     public ITooltip computeRenderables(List<String> legacyTextData) {
         ITooltip verticalLayout = new VPanelComponent();
 
@@ -53,22 +65,15 @@ public class TooltipCompat {
 
                     if (renderMatcher.find()) {
                         String renderName = renderMatcher.group("name");
-
-                        switch (renderName) {
-                            case "waila.health":
-                                String[] healthArgs = splitRendererArgs(renderMatcher.group("args"));
-                                lineComponent.child(healthParser.parse(healthArgs));
-                                break;
-                            case "waila.stack":
-                                String[] itemArgs = splitRendererArgs(renderMatcher.group("args"));
-                                lineComponent.child(itemParser.parse(itemArgs));
-                                break;
-                            case "waila.progress":
-                                String[] progressArgs = splitRendererArgs(renderMatcher.group("args"));
-                                lineComponent.child(progressParser.parse(progressArgs));
-                                break;
-                            default:
-                                break;
+                        String[] rendererArgs = splitRendererArgs(renderMatcher.group("args"));
+                        Component modernComponent = parseModernRenderer(renderName, rendererArgs);
+                        if (modernComponent != null) {
+                            lineComponent.child(modernComponent);
+                        } else {
+                            IWailaTooltipRenderer renderer = ModuleRegistrar.instance().getTooltipRenderer(renderName);
+                            if (renderer != null) {
+                                lineComponent.child(new LegacyRendererComponent(renderer, rendererArgs));
+                            }
                         }
                     } else if (iconMatcher.find()) {
                         String iconArg = iconMatcher.group("type");
@@ -82,11 +87,25 @@ public class TooltipCompat {
         return verticalLayout;
     }
 
+    /** Selects the native WDMla implementation for every renderer built into current GTNH Waila and GregTech. */
+    private Component parseModernRenderer(String renderName, String[] args) {
+        return switch (renderName) {
+            case "waila.health" -> healthParser.parse(args);
+            case "waila.stack" -> itemParser.parse(args);
+            case "waila.progress" -> progressParser.parse(args);
+            case "waila.fluid" -> fluidParser.parse(args);
+            case "waila.rfenergy" -> energyParser.parse(args);
+            case "waila.tcaspect" -> aspectParser.parse(args);
+            case "waila.gt.progress" -> gtProgressParser.parse(args);
+            default -> null;
+        };
+    }
+
     /** Splits current Waila renderer arguments while accepting the legacy comma encoding. */
     private static String[] splitRendererArgs(String args) {
         if (args.contains(WailaRendererComma)) {
-            return args.split(Pattern.quote(WailaRendererComma));
+            return args.split(Pattern.quote(WailaRendererComma), -1);
         }
-        return args.split(",");
+        return args.split(",", -1);
     }
 }

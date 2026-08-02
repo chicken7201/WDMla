@@ -267,8 +267,8 @@ public class DisplayUtil {
     /** Splits renderer arguments using the current separator while accepting legacy comma encoding. */
     private static String[] splitRendererArgs(String args) {
         if (args.contains(SpecialChars.WailaRendererComma)) {
-            return args.split(Pattern.quote(SpecialChars.WailaRendererComma));
+            return args.split(Pattern.quote(SpecialChars.WailaRendererComma), -1);
         }
-        return args.split(",");
+        return args.split(",", -1);
     }
 }

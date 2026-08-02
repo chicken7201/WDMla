@@ -7,20 +7,28 @@ import net.minecraft.item.ItemStack;
 import com.gtnewhorizons.wdmla.api.ITTRenderParser;
 import com.gtnewhorizons.wdmla.impl.ui.component.Component;
 import com.gtnewhorizons.wdmla.impl.ui.component.ItemComponent;
+import com.gtnewhorizons.wdmla.impl.ui.sizer.Padding;
+import com.gtnewhorizons.wdmla.impl.ui.sizer.Size;
 
 public class ItemArgsParser implements ITTRenderParser {
 
+    /** Builds a normal or compact WDMla item component from a legacy stack token. */
     @Override
     public Component parse(String[] args) {
         int type = Integer.parseInt(args[0]); // 0 for block, 1 for item
         String name = args[1]; // Fully qualified name
         int amount = Integer.parseInt(args[2]);
         int meta = Integer.parseInt(args[3]);
+        boolean small = Boolean.parseBoolean(args.length > 4 ? args[4] : "false");
 
         ItemStack stack = null;
         if (type == 0) stack = new ItemStack((Block) Block.blockRegistry.getObject(name), amount, meta);
         if (type == 1) stack = new ItemStack((Item) Item.itemRegistry.getObject(name), amount, meta);
 
-        return new ItemComponent(stack);
+        ItemComponent component = new ItemComponent(stack);
+        if (small) {
+            component.padding(new Padding(0, 0, 1, 1)).size(new Size(8, 8));
+        }
+        return component;
     }
 }

@@ -27,6 +27,7 @@ import com.gtnewhorizons.wdmla.impl.ObjectDataCenter;
 import com.gtnewhorizons.wdmla.impl.WDMlaClientRegistration;
 import com.gtnewhorizons.wdmla.impl.ui.component.RootComponent;
 import com.gtnewhorizons.wdmla.impl.ui.component.TextComponent;
+import com.gtnewhorizons.wdmla.impl.ui.drawable.BlockDrawable;
 import com.gtnewhorizons.wdmla.impl.ui.sizer.Area;
 import com.gtnewhorizons.wdmla.impl.ui.sizer.Size;
 import com.gtnewhorizons.wdmla.impl.ui.style.TextStyle;
@@ -90,6 +91,7 @@ public class WDMlaTickHandler {
         }
     }
 
+    /** Updates tooltip state and advances 3D block rotation only while a block HUD is active. */
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void tickClient(TickEvent.ClientTickEvent event) {
@@ -154,6 +156,9 @@ public class WDMlaTickHandler {
         }
 
         mainHUD = handle(accessor);
+        if (mainHUD != null && target.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+            BlockDrawable.advanceRotation();
+        }
     }
 
     public RootComponent handle(Accessor accessor) {
