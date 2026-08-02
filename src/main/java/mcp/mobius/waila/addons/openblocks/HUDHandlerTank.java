@@ -17,6 +17,8 @@ import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.cbcore.LangUtil;
 
+import com.gtnewhorizons.wdmla.wailacompat.LegacyFluidRenderer;
+
 public class HUDHandlerTank implements IWailaDataProvider {
 
     @Override
@@ -60,9 +62,10 @@ public class HUDHandlerTank implements IWailaDataProvider {
         FluidTankInfo[] tanks = handler.getTankInfo(ForgeDirection.UNKNOWN);
         if (tanks.length != 1) return currenttip;
 
-        if (tanks[0].fluid != null)
-            currenttip.add(String.format("%d / %d mB", tanks[0].fluid.amount, tanks[0].capacity));
-        else currenttip.add(String.format("0 / %d mB", tanks[0].capacity));
+        if (!LegacyFluidRenderer.isHandledByModernProvider(accessor)) {
+            int amount = tanks[0].fluid == null ? 0 : tanks[0].fluid.amount;
+            currenttip.add(LegacyFluidRenderer.render(tanks[0].fluid, amount, tanks[0].capacity));
+        }
 
         return currenttip;
     }

@@ -20,6 +20,8 @@ import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.api.impl.ConfigHandler;
 import mcp.mobius.waila.cbcore.LangUtil;
 
+import com.gtnewhorizons.wdmla.wailacompat.LegacyFluidRenderer;
+
 public class HUDHandlerBCTanks implements IWailaDataProvider {
 
     @Override
@@ -50,7 +52,10 @@ public class HUDHandlerBCTanks implements IWailaDataProvider {
         int liquidAmount = stack != null ? stack.amount : 0;
         int capacity = tank != null ? tank.capacity : 0;
 
-        if (ConfigHandler.instance().getConfig("bc.tankamount")) currenttip.add(liquidAmount + "/" + capacity + " mB");
+        if (ConfigHandler.instance().getConfig("bc.tankamount")
+                && !LegacyFluidRenderer.isHandledByModernProvider(accessor)) {
+            currenttip.add(LegacyFluidRenderer.render(stack, liquidAmount, capacity));
+        }
 
         return currenttip;
     }

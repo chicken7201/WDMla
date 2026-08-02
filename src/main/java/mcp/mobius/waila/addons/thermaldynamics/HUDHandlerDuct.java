@@ -14,6 +14,8 @@ import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.cbcore.LangUtil;
 
+import com.gtnewhorizons.wdmla.wailacompat.LegacyFluidRenderer;
+
 /**
  * Created by Lordmau5 on 28.02.2015.
  */
@@ -53,7 +55,9 @@ public class HUDHandlerDuct implements IWailaDataProvider {
         NBTTagCompound tag = accessor.getNBTData();
         if (tag.hasKey("Amount")) amount = accessor.getNBTInteger(tag, "Amount");
 
-        currenttip.add(String.format(" %d / 1000 mB", amount));
+        if (!LegacyFluidRenderer.isHandledByModernProvider(accessor)) {
+            currenttip.add(LegacyFluidRenderer.render(FluidStack.loadFluidStackFromNBT(tag), amount, 1000));
+        }
 
         return currenttip;
     }
