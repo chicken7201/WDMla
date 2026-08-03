@@ -3,8 +3,8 @@
   "modList": [
     {
       "modid": "Waila",
-      "name": "Waila",
-      "description": "All your data are belong to us.",
+      "name": "${modName} Unofficial(Waila Compatibility)",
+      "description": "All your data are belong to us.\nThis is a compatibility mode for WDMla.",
       "version": "${modVersion}",
       "mcversion": "${minecraftVersion}",
       "url": "",
@@ -17,8 +17,8 @@
     },
     {
       "modid": "${modId}",
-      "name": "${modName}",
-      "description": "All your Waila are belong to DreamMasterXXL.",
+      "name": "${modName} Unofficial",
+      "description": "All your Waila are belong to DreamMasterXXL.\nThis is an unofficial modified version.",
       "version": "${modVersion}",
       "mcversion": "${minecraftVersion}",
       "url": "",
