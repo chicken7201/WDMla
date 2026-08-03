@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
-import net.minecraftforge.fluids.IFluidTank;
 
 import com.gtnewhorizons.wdmla.config.General;
 
@@ -115,9 +114,9 @@ public final class LegacyFluidStorageCompat {
                 && tanks[0].fluid.amount > 0;
     }
 
-    /** Detects storage targets covered by WDMla's generic Forge fluid provider. */
+    /** Detects storage targets covered by WDMla's modern fluid providers. */
     private static boolean isStandardFluidStorage(Object target) {
-        return target instanceof IFluidHandler || target instanceof IFluidTank;
+        return LegacyFluidRenderer.isModernFluidStorage(target);
     }
 
     /** Reads TConstruct's public structure state without introducing a hard dependency on the mod. */

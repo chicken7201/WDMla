@@ -15,13 +15,27 @@ import mcp.mobius.waila.api.SpecialChars;
 public final class LegacyFluidRenderer {
 
     private static final String EMPTY_FLUID = "EMPTYFLUID";
+    private static final String RAILCRAFT_TANK_TILE = "mods.railcraft.common.blocks.machine.beta.TileTankBase";
 
     private LegacyFluidRenderer() {}
 
-    /** Checks whether WDMla's generic provider already renders this target's fluid storage. */
+    /** Checks whether a WDMla modern provider already renders this target's fluid storage. */
     public static boolean isHandledByModernProvider(IWailaDataAccessor accessor) {
         Object target = accessor.getTileEntity();
-        return General.overrideWailaTooltips && (target instanceof IFluidHandler || target instanceof IFluidTank);
+        return General.overrideWailaTooltips && isModernFluidStorage(target);
+    }
+
+    /** Detects Forge tanks and Railcraft multiblock parts handled by WDMla's modern fluid providers. */
+    public static boolean isModernFluidStorage(@Nullable Object target) {
+        if (target instanceof IFluidHandler || target instanceof IFluidTank) {
+            return true;
+        }
+        for (Class<?> type = target == null ? null : target.getClass(); type != null; type = type.getSuperclass()) {
+            if (RAILCRAFT_TANK_TILE.equals(type.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Encodes one fluid tank as a binary-compatible waila.fluid renderer token. */
