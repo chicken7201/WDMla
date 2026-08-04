@@ -8,6 +8,7 @@ import com.gtnewhorizons.wdmla.api.IWDMlaPlugin;
 import com.gtnewhorizons.wdmla.api.WDMlaPlugin;
 
 import mods.railcraft.common.blocks.machine.TileMachineBase;
+import mods.railcraft.common.blocks.machine.TileMultiBlock;
 import mods.railcraft.common.blocks.machine.beta.TileTankBase;
 import mods.railcraft.common.blocks.tracks.TileTrack;
 import mods.railcraft.common.carts.EntityLocomotive;
@@ -29,6 +30,8 @@ public class RailcraftPlugin implements IWDMlaPlugin {
         registration.registerBlockDataProvider(RailcraftDetailsProvider.INSTANCE, TileMachineBase.class);
         registration.registerBlockDataProvider(RailcraftDetailsProvider.INSTANCE, TileTrack.class);
         registration.registerEntityDataProvider(RailcraftLocomotiveProvider.INSTANCE, EntityLocomotive.class);
+        registration.registerItemStorage(RailcraftMultiBlockItemProvider.INSTANCE, TileMultiBlock.class);
+        registration.registerFluidStorage(RailcraftMultiBlockFluidProvider.INSTANCE, TileMultiBlock.class);
         registration.registerFluidStorage(RailcraftTankFluidProvider.INSTANCE, TileTankBase.class);
     }
 }
