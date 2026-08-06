@@ -43,5 +43,4 @@ public interface IWailaVariableWidthTooltipRenderer extends IWailaTooltipRendere
      *
      */
     int getMaxLineWidth();
-
 }

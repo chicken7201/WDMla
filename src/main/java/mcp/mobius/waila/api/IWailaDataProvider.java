@@ -66,6 +66,18 @@ public interface IWailaDataProvider {
     List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
             IWailaConfigHandler config);
 
+    /** Returns whether this provider has advanced body data for the current target. */
+    default boolean hasWailaAdvancedBody(ItemStack itemStack, IWailaDataAccessor accessor,
+            IWailaConfigHandler config) {
+        return false;
+    }
+
+    /** Adds body data shown while the Waila advanced-details key is held. */
+    default List<String> getWailaAdvancedBody(ItemStack itemStack, List<String> currenttip,
+            IWailaDataAccessor accessor, IWailaConfigHandler config) {
+        return currenttip;
+    }
+
     /**
      * Callback used to add lines to one of the three sections of the tooltip (Head, Body, Tail).</br>
      * Will be used if the implementing class is registered via {@link IWailaRegistrar}.registerTailProvider client
