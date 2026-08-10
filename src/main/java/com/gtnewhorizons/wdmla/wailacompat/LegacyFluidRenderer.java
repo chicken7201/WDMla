@@ -19,7 +19,9 @@ public final class LegacyFluidRenderer {
             "tconstruct.smeltery.logic.SmelteryLogic",
             "tconstruct.smeltery.logic.CastingChannelLogic",
             "codechicken.enderstorage.storage.liquid.TileEnderTank",
-            "crazypants.enderio.machine.tank.TileTank" };
+            "crazypants.enderio.machine.tank.TileTank",
+            "gregtech.api.metatileentity.BaseMetaTileEntity",
+            "gregtech.api.metatileentity.BaseMetaPipeEntity" };
 
     /** Prevents construction of the legacy fluid rendering helper. */
     private LegacyFluidRenderer() {}

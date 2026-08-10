@@ -87,7 +87,8 @@ public class FluidStorageProvider<T extends Accessor> implements IComponentProvi
             return;
         }
 
-        List<ClientViewGroup<FluidView>> visibleGroups = visibleGroups(groups, accessor.showDetails());
+        boolean showEmptyTanks = accessor.getPlayer() != null && accessor.getPlayer().isSneaking();
+        List<ClientViewGroup<FluidView>> visibleGroups = visibleGroups(groups, showEmptyTanks);
         if (visibleGroups.isEmpty()) {
             return;
         }
@@ -117,10 +118,10 @@ public class FluidStorageProvider<T extends Accessor> implements IComponentProvi
         });
     }
 
-    /** Hides empty tanks normally while retaining the complete group metadata for detailed display. */
+    /** Hides empty tanks unless the player is currently crouching. */
     private static List<ClientViewGroup<FluidView>> visibleGroups(List<ClientViewGroup<FluidView>> groups,
-            boolean showDetails) {
-        if (showDetails) {
+            boolean showEmptyTanks) {
+        if (showEmptyTanks) {
             return groups;
         }
 

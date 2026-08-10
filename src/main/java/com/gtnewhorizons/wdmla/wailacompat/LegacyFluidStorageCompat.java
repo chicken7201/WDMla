@@ -12,6 +12,7 @@ import net.minecraftforge.fluids.IFluidHandler;
 
 import com.gtnewhorizons.wdmla.config.General;
 
+import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.SpecialChars;
 
 /** Removes legacy fluid text when the same storage is rendered by WDMla's modern fluid view. */
@@ -20,6 +21,8 @@ public final class LegacyFluidStorageCompat {
     private static final String TCONSTRUCT_WAILA_PACKAGE = "tconstruct.plugins.waila.";
     private static final String ENDER_IO_WAILA_PROVIDER = "crazypants.enderio.waila.WailaCompat";
     private static final String ENDER_IO_TANK = "crazypants.enderio.machine.tank.TileTank";
+    private static final String GREGTECH_WAILA_PROVIDER = "gregtech.crossmod.waila.GregtechTEWailaDataProvider";
+    private static final String EMPTY_FLUID = "EMPTYFLUID";
     private static final Pattern FLUID_CAPACITY_TEXT = Pattern.compile(
             "(?i)^.*\\d[\\d,. ]*\\s*/\\s*\\d[\\d,. ]*\\s*mB\\s*$");
 
@@ -41,8 +44,61 @@ public final class LegacyFluidStorageCompat {
             return;
         }
         if (isStandardFluidStorage(target)) {
-            removeDuplicatedFluidRows(start, tooltips);
+            // GregTech may replace an earlier body row instead of appending its fluid renderer.
+            int fluidStart = GREGTECH_WAILA_PROVIDER.equals(provider.getClass().getName()) ? 0 : start;
+            removeDuplicatedFluidRows(fluidStart, tooltips);
         }
+    }
+
+    /** Removes empty legacy fluid renderer rows unless the player is crouching. */
+    public static void filterEmptyFluidRows(IWailaDataAccessor accessor, List<String> tooltips) {
+        if (accessor == null || accessor.getPlayer() == null || accessor.getPlayer().isSneaking()
+                || tooltips == null) {
+            return;
+        }
+
+        ListIterator<String> iterator = tooltips.listIterator();
+        while (iterator.hasNext()) {
+            String tooltip = iterator.next();
+            if (tooltip == null) {
+                continue;
+            }
+            Matcher renderer = SpecialChars.patternRender.matcher(tooltip);
+            StringBuffer filtered = new StringBuffer();
+            boolean removed = false;
+            while (renderer.find()) {
+                if (isEmptyFluidRenderer(renderer)) {
+                    renderer.appendReplacement(filtered, "");
+                    removed = true;
+                }
+            }
+            if (!removed) {
+                continue;
+            }
+
+            renderer.appendTail(filtered);
+            String visibleText = SpecialChars.patternMinecraft.matcher(filtered.toString()).replaceAll("");
+            visibleText = SpecialChars.patternWaila.matcher(visibleText).replaceAll("").trim();
+            if (visibleText.isEmpty()) {
+                iterator.remove();
+            } else {
+                iterator.set(filtered.toString());
+            }
+        }
+    }
+
+    /** Detects the EMPTYFLUID sentinel in a legacy waila.fluid renderer token. */
+    private static boolean isEmptyFluidRenderer(Matcher renderer) {
+        if (!"waila.fluid".equalsIgnoreCase(renderer.group("name"))) {
+            return false;
+        }
+        String arguments = renderer.group("args");
+        if (arguments == null) {
+            return false;
+        }
+        String[] values = arguments.split(Pattern.quote(SpecialChars.WailaRendererComma), -1);
+        return values.length >= 2 && EMPTY_FLUID.equalsIgnoreCase(values[0])
+                && EMPTY_FLUID.equalsIgnoreCase(values[1]);
     }
 
     /** Removes the known Liquid/Amount rows emitted by GTNH TConstruct's Waila providers. */

@@ -93,6 +93,7 @@ public class DataProviderCompat {
                             .getWailaTail(itemForm, legacyTooltips, legacyAccessor, ConfigHandler.instance());;
                 }
             }
+            LegacyFluidStorageCompat.filterEmptyFluidRows(legacyAccessor, legacyTooltips);
         } catch (Throwable e) {
             WailaExceptionHandler.handleErr(e, this.getClass().toString(), legacyTooltips);
         }
@@ -139,6 +140,7 @@ public class DataProviderCompat {
                             .getWailaTail(entity, legacyTooltips, legacyAccessor, ConfigHandler.instance());
                 }
             }
+            LegacyFluidStorageCompat.filterEmptyFluidRows(legacyAccessor, legacyTooltips);
         } catch (Throwable e) {
             WailaExceptionHandler.handleErr(e, this.getClass().toString(), legacyTooltips);
         }
