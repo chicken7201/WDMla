@@ -52,6 +52,7 @@ public class DataProviderCompat {
                 for (IWailaDataProvider dataProvider : providersList) {
                     int previousSize = legacyTooltips.size();
                     legacyTooltips = dataProvider.getWailaBody(itemForm, legacyTooltips, legacyAccessor, config);
+                    LegacyItemStorageCompat.filterBody(dataProvider, legacyAccessor, previousSize, legacyTooltips);
                     LegacyFluidStorageCompat.filterBody(
                             dataProvider,
                             legacyAccessor.getTileEntity(),
@@ -63,6 +64,11 @@ public class DataProviderCompat {
                             int previousAdvancedSize = legacyTooltips.size();
                             legacyTooltips = dataProvider
                                     .getWailaAdvancedBody(itemForm, legacyTooltips, legacyAccessor, config);
+                            LegacyItemStorageCompat.filterBody(
+                                    dataProvider,
+                                    legacyAccessor,
+                                    previousAdvancedSize,
+                                    legacyTooltips);
                             LegacyFluidStorageCompat.filterBody(
                                     dataProvider,
                                     legacyAccessor.getTileEntity(),

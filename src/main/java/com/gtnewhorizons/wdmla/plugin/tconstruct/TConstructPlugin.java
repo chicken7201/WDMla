@@ -6,6 +6,9 @@ import com.gtnewhorizons.wdmla.api.IWDMlaClientRegistration;
 import com.gtnewhorizons.wdmla.api.IWDMlaCommonRegistration;
 import com.gtnewhorizons.wdmla.api.IWDMlaPlugin;
 import com.gtnewhorizons.wdmla.api.WDMlaPlugin;
+import com.gtnewhorizons.wdmla.api.provider.IServerExtensionProvider;
+import com.gtnewhorizons.wdmla.api.view.FluidView;
+import com.gtnewhorizons.wdmla.plugin.universal.FluidStorageProvider;
 
 import mcp.mobius.waila.Waila;
 
@@ -22,6 +25,10 @@ public class TConstructPlugin implements IWDMlaPlugin {
     /** Registers exact tile classes so their multi-tank providers win over the generic fallback. */
     @Override
     public void register(IWDMlaCommonRegistration registration) {
+        registerFluidProvider(
+                registration,
+                FluidStorageProvider.Extension.INSTANCE,
+                "tconstruct.smeltery.logic.LavaTankLogic");
         registerFluidProvider(
                 registration,
                 CastingChannelFluidStorageProvider.INSTANCE,
@@ -46,7 +53,7 @@ public class TConstructPlugin implements IWDMlaPlugin {
 
     /** Resolves an optional TConstruct tile class without adding a compile-time dependency. */
     private static void registerFluidProvider(IWDMlaCommonRegistration registration,
-            TConstructFluidStorageProvider provider, String className) {
+            IServerExtensionProvider<FluidView.Data> provider, String className) {
         try {
             registration.registerFluidStorage(provider, Class.forName(className));
         } catch (ClassNotFoundException e) {

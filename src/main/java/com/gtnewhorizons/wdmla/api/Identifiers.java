@@ -40,6 +40,7 @@ public final class Identifiers {
 
     public static final ResourceLocation ITEM_STORAGE = Universal("item_storage");
     public static final ResourceLocation ITEM_STORAGE_DEFAULT = Universal("item_storage_default");
+    public static final ResourceLocation ITEM_STORAGE_CAPACITY = Universal("item_storage_capacity");
     public static final ResourceLocation FLUID_STORAGE = Universal("fluid_storage");
     public static final ResourceLocation FLUID_STORAGE_DEFAULT = Universal("fluid_storage_default");
     public static final ResourceLocation PROGRESS = Universal("progress");

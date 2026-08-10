@@ -18,6 +18,7 @@ import com.gtnewhorizons.wdmla.config.WDMlaConfig;
 @WDMlaPlugin(uid = Identifiers.NAMESPACE_UNIVERSAL)
 public class UniversalPlugin implements IWDMlaPlugin {
 
+    /** Registers universal server data providers shared by explicit storage adapters. */
     @Override
     public void register(IWDMlaCommonRegistration registration) {
         registration.registerBlockDataProvider(ItemStorageProvider.getBlock(), Block.class);
@@ -28,6 +29,7 @@ public class UniversalPlugin implements IWDMlaPlugin {
         registration.registerEntityDataProvider(ProgressProvider.getEntity(), Entity.class);
     }
 
+    /** Registers universal client renderers, including the capacity-aware item row. */
     @Override
     public void registerClient(IWDMlaClientRegistration registration) {
         registration.registerBlockComponent(ItemStorageProvider.getBlock(), Block.class);
@@ -37,6 +39,7 @@ public class UniversalPlugin implements IWDMlaPlugin {
         registration.registerBlockComponent(ProgressProvider.getBlock(), Block.class);
         registration.registerEntityComponent(ProgressProvider.getEntity(), Entity.class);
         registration.registerItemStorageClient(ItemStorageProvider.Extension.INSTANCE);
+        registration.registerItemStorageClient(CapacityItemStorageClientProvider.INSTANCE);
         registration.registerFluidStorageClient(FluidStorageProvider.Extension.INSTANCE);
 
         WDMlaConfig.instance()

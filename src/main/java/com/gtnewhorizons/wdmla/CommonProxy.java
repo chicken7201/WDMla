@@ -160,10 +160,17 @@ public class CommonProxy {
         return null;
     }
 
+    /** Converts valid Forge tank snapshots into the shared synchronized fluid group. */
     public static List<ViewGroup<FluidView.Data>> fromFluidStorage(FluidTankInfo[] storage) {
+        if (storage == null || storage.length == 0) {
+            return new ArrayList<>();
+        }
         Map<FluidStack, Long> map = new HashMap<>();
         int emptyTanks = 0;
         for (FluidTankInfo fluidTankInfo : storage) {
+            if (fluidTankInfo == null || fluidTankInfo.capacity <= 0) {
+                continue;
+            }
             if (fluidTankInfo.fluid == null) {
                 emptyTanks++;
             }
@@ -172,10 +179,6 @@ public class CommonProxy {
                 break;
             }
         }
-        if (storage.length == 0) {
-            return new ArrayList<>();
-        }
-
         int remaining = storage.length - emptyTanks - map.size();
         ViewGroup<FluidView.Data> group = new ViewGroup<>(
                 map.entrySet().stream().map(entry -> new FluidView.Data(entry.getKey(), entry.getValue()))

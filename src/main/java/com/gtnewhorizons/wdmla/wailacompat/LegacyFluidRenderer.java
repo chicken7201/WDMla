@@ -1,8 +1,6 @@
 package com.gtnewhorizons.wdmla.wailacompat;
 
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidHandler;
-import net.minecraftforge.fluids.IFluidTank;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -15,8 +13,15 @@ import mcp.mobius.waila.api.SpecialChars;
 public final class LegacyFluidRenderer {
 
     private static final String EMPTY_FLUID = "EMPTYFLUID";
-    private static final String RAILCRAFT_TANK_TILE = "mods.railcraft.common.blocks.machine.beta.TileTankBase";
+    private static final String[] MODERN_FLUID_STORAGE_TYPES = {
+            "mods.railcraft.common.blocks.machine.beta.TileTankBase",
+            "tconstruct.smeltery.logic.LavaTankLogic",
+            "tconstruct.smeltery.logic.SmelteryLogic",
+            "tconstruct.smeltery.logic.CastingChannelLogic",
+            "codechicken.enderstorage.storage.liquid.TileEnderTank",
+            "crazypants.enderio.machine.tank.TileTank" };
 
+    /** Prevents construction of the legacy fluid rendering helper. */
     private LegacyFluidRenderer() {}
 
     /** Checks whether a WDMla modern provider already renders this target's fluid storage. */
@@ -25,14 +30,13 @@ public final class LegacyFluidRenderer {
         return General.overrideWailaTooltips && isModernFluidStorage(target);
     }
 
-    /** Detects Forge tanks and Railcraft multiblock parts handled by WDMla's modern fluid providers. */
+    /** Detects only exact storage classes registered with WDMla's modern fluid providers. */
     public static boolean isModernFluidStorage(@Nullable Object target) {
-        if (target instanceof IFluidHandler || target instanceof IFluidTank) {
-            return true;
-        }
         for (Class<?> type = target == null ? null : target.getClass(); type != null; type = type.getSuperclass()) {
-            if (RAILCRAFT_TANK_TILE.equals(type.getName())) {
-                return true;
+            for (String storageType : MODERN_FLUID_STORAGE_TYPES) {
+                if (storageType.equals(type.getName())) {
+                    return true;
+                }
             }
         }
         return false;

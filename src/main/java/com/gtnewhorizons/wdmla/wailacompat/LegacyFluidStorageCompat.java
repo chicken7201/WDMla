@@ -18,9 +18,12 @@ import mcp.mobius.waila.api.SpecialChars;
 public final class LegacyFluidStorageCompat {
 
     private static final String TCONSTRUCT_WAILA_PACKAGE = "tconstruct.plugins.waila.";
+    private static final String ENDER_IO_WAILA_PROVIDER = "crazypants.enderio.waila.WailaCompat";
+    private static final String ENDER_IO_TANK = "crazypants.enderio.machine.tank.TileTank";
     private static final Pattern FLUID_CAPACITY_TEXT = Pattern.compile(
             "(?i)^.*\\d[\\d,. ]*\\s*/\\s*\\d[\\d,. ]*\\s*mB\\s*$");
 
+    /** Prevents construction of the legacy fluid compatibility filter. */
     private LegacyFluidStorageCompat() {}
 
     /** Filters fluid-only lines appended by one legacy body provider. */
@@ -31,6 +34,10 @@ public final class LegacyFluidStorageCompat {
         int start = Math.max(0, Math.min(previousSize, tooltips.size()));
         if (provider.getClass().getName().startsWith(TCONSTRUCT_WAILA_PACKAGE)) {
             filterTConstruct(provider.getClass().getSimpleName(), target, start, tooltips);
+            return;
+        }
+        if (ENDER_IO_WAILA_PROVIDER.equals(provider.getClass().getName()) && hasType(target, ENDER_IO_TANK)) {
+            removeLastAddedRow(start, tooltips);
             return;
         }
         if (isStandardFluidStorage(target)) {
@@ -126,6 +133,23 @@ public final class LegacyFluidStorageCompat {
             return validStructure.getBoolean(target);
         } catch (ReflectiveOperationException ignored) {
             return false;
+        }
+    }
+
+    /** Checks an optional target hierarchy by name without linking the owning mod. */
+    private static boolean hasType(Object target, String expectedClassName) {
+        for (Class<?> type = target == null ? null : target.getClass(); type != null; type = type.getSuperclass()) {
+            if (expectedClassName.equals(type.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Removes the final row appended by a provider while preserving its unrelated setup rows. */
+    private static void removeLastAddedRow(int start, List<String> tooltips) {
+        if (tooltips.size() > start) {
+            tooltips.remove(tooltips.size() - 1);
         }
     }
 
