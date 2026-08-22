@@ -11,9 +11,10 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import org.jetbrains.annotations.Nullable;
 
 import com.gtnewhorizons.wdmla.CommonProxy;
-import com.gtnewhorizons.wdmla.api.Identifiers;
 import com.gtnewhorizons.wdmla.api.accessor.Accessor;
+import com.gtnewhorizons.wdmla.api.provider.IClientExtensionProvider;
 import com.gtnewhorizons.wdmla.api.provider.IServerExtensionProvider;
+import com.gtnewhorizons.wdmla.api.view.ClientViewGroup;
 import com.gtnewhorizons.wdmla.api.view.FluidView;
 import com.gtnewhorizons.wdmla.api.view.ViewGroup;
 
@@ -23,6 +24,7 @@ import mcp.mobius.waila.utils.WailaExceptionHandler;
 public final class GregTechDigitalTankStorageProvider implements IServerExtensionProvider<FluidView.Data> {
 
     private static final String DIGITAL_TANK = "gregtech.common.tileentities.storage.MTEDigitalTankBase";
+    static final ResourceLocation DIGITAL_TANK_STORAGE = new ResourceLocation("gregtech", "digital_tank_storage");
 
     private final Class<?> digitalTankClass;
     private final Method getMetaTileEntity;
@@ -68,15 +70,34 @@ public final class GregTechDigitalTankStorageProvider implements IServerExtensio
         }
     }
 
-    /** Reuses WDMla's standard synchronized fluid renderer. */
+    /** Selects the dedicated GregTech decoder without colliding with the generic fluid fallback. */
     @Override
     public ResourceLocation getUid() {
-        return Identifiers.FLUID_STORAGE_DEFAULT;
+        return DIGITAL_TANK_STORAGE;
     }
 
     /** Makes the real digital tank capacity win over the generic GregTech fluid handler. */
     @Override
     public int getDefaultPriority() {
         return 1000;
+    }
+
+    /** Maps GregTech's standard FluidView payload under its dedicated provider identifier. */
+    public enum ClientExtension implements IClientExtensionProvider<FluidView.Data, FluidView> {
+
+        INSTANCE;
+
+        /** Decodes the synchronized tank rows with WDMla's standard fluid mapping. */
+        @Override
+        public List<ClientViewGroup<FluidView>> getClientGroups(Accessor accessor,
+                List<ViewGroup<FluidView.Data>> groups) {
+            return ClientViewGroup.map(groups, FluidView::readDefault, null);
+        }
+
+        /** Matches the dedicated identifier emitted by the GregTech server provider. */
+        @Override
+        public ResourceLocation getUid() {
+            return DIGITAL_TANK_STORAGE;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.gtnewhorizons.wdmla.plugin.gregtech;
 
+import com.gtnewhorizons.wdmla.api.IWDMlaClientRegistration;
 import com.gtnewhorizons.wdmla.api.IWDMlaCommonRegistration;
 import com.gtnewhorizons.wdmla.api.IWDMlaPlugin;
 import com.gtnewhorizons.wdmla.api.WDMlaPlugin;
@@ -13,6 +14,12 @@ public class GregTechStoragePlugin implements IWDMlaPlugin {
 
     private static final String BASE_META_TILE_ENTITY = "gregtech.api.metatileentity.BaseMetaTileEntity";
     private static final String BASE_META_PIPE_ENTITY = "gregtech.api.metatileentity.BaseMetaPipeEntity";
+
+    /** Registers the decoder paired with the dedicated digital tank provider identifier. */
+    @Override
+    public void registerClient(IWDMlaClientRegistration registration) {
+        registration.registerFluidStorageClient(GregTechDigitalTankStorageProvider.ClientExtension.INSTANCE);
+    }
 
     /** Registers specialized digital stores before generic machine, hatch, bus, and pipe storage adapters. */
     @Override
