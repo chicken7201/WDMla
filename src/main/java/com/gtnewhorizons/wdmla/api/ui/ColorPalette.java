@@ -30,8 +30,8 @@ public final class ColorPalette {
 
     public static final int PROGRESS_BACKGROUND = TRANSPARENT;
     public static final int PROGRESS_BORDER = 0xFF555555;
-    public static final int PROGRESS_FILLED = 0xFFFFCC00;
-    public static final int PROGRESS_FILLED_ALTERNATE = 0xFFBB9900;
+    public static final int PROGRESS_FILLED = 0xFF00FF00;
+    public static final int PROGRESS_FILLED_ALTERNATE = 0xFF00FF00;
 
     public static final int ENERGY_FILLED = 0xFFAA0000;
     public static final int ENERGY_FILLED_ALTERNATE = 0xFF660000;
