@@ -20,6 +20,7 @@ import mcp.mobius.waila.api.impl.DataAccessorCommon;
 import mcp.mobius.waila.api.impl.ModuleRegistrar;
 import mcp.mobius.waila.handlers.VanillaTooltipHandler;
 import mcp.mobius.waila.handlers.nei.NEIHandler;
+import mcp.mobius.waila.overlay.tooltiprenderers.TTRenderBar;
 import mcp.mobius.waila.overlay.tooltiprenderers.TTRenderStack;
 import mcp.mobius.waila.server.ProxyServer;
 
@@ -57,6 +58,7 @@ public class ProxyClient extends ProxyServer {
                 .registerTooltipRenderer("waila.rfenergy", new ModernRendererAdapter(new EnergyArgsParser()));
         ModuleRegistrar.instance()
                 .registerTooltipRenderer("waila.tcaspect", new ModernRendererAdapter(new AspectArgsParser()));
+        ModuleRegistrar.instance().registerTooltipRenderer("waila.bar", new TTRenderBar());
 
         MinecraftForge.EVENT_BUS.register(new WorldUnloadEventHandler());
         MinecraftForge.EVENT_BUS.register(new BlockBreakEventHandler());

@@ -13,6 +13,7 @@ import com.gtnewhorizons.wdmla.api.ui.ITooltip;
 import com.gtnewhorizons.wdmla.impl.ui.component.Component;
 import com.gtnewhorizons.wdmla.impl.ui.component.VPanelComponent;
 import com.gtnewhorizons.wdmla.wailacompat.parser.AspectArgsParser;
+import com.gtnewhorizons.wdmla.wailacompat.parser.BarArgsParser;
 import com.gtnewhorizons.wdmla.wailacompat.parser.CropsNHProgressArgsParser;
 import com.gtnewhorizons.wdmla.wailacompat.parser.EnergyArgsParser;
 import com.gtnewhorizons.wdmla.wailacompat.parser.FluidArgsParser;
@@ -37,6 +38,7 @@ public class TooltipCompat {
     private final ITTRenderParser fluidParser = new FluidArgsParser();
     private final ITTRenderParser energyParser = new EnergyArgsParser();
     private final ITTRenderParser aspectParser = new AspectArgsParser();
+    private final ITTRenderParser barParser = new BarArgsParser();
     private final ITTRenderParser gtProgressParser = new GTProgressArgsParser();
     private final ITTRenderParser iconParser = new IconArgsParser();
     private final ITTRenderParser cropsNHProgressParser = new CropsNHProgressArgsParser();
@@ -98,6 +100,7 @@ public class TooltipCompat {
             case "waila.fluid" -> fluidParser.parse(args);
             case "waila.rfenergy" -> energyParser.parse(args);
             case "waila.tcaspect" -> aspectParser.parse(args);
+            case "waila.bar" -> barParser.parse(args);
             case "waila.gt.progress" -> gtProgressParser.parse(args);
             case "waila.cropsnh.cropStick.progress" -> cropsNHProgressParser.parse(args);
             default -> null;
