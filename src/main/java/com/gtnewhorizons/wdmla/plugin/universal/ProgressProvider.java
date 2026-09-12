@@ -66,6 +66,7 @@ public class ProgressProvider<T extends Accessor> implements IComponentProvider<
         append(tooltip, groups);
     }
 
+    /** Appends progress groups, using Process Fill as the sole base colour when no custom style is supplied. */
     public static void append(ITooltip tooltip, List<ClientViewGroup<ProgressView>> groups) {
         boolean renderGroup = groups.size() > 1 || groups.get(0).shouldRenderGroup();
         ClientViewGroup.tooltip(tooltip, groups, renderGroup, (theTooltip, group) -> {
@@ -76,9 +77,6 @@ public class ProgressProvider<T extends Accessor> implements IComponentProvider<
                 ProgressStyle progressStyle = view.style == null
                         ? new ProgressStyle().singleColor(General.progressColor.filled)
                         : view.style;
-                if (view.hasScale && view.style == null) {
-                    progressStyle.color(General.progressColor.filled, General.progressColor.filledAlternate);
-                }
                 ProgressComponent progress = new ProgressComponent(view.progress, view.maxProgress)
                         .style(progressStyle);
                 if (view.description != null) {
