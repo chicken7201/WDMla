@@ -7,6 +7,7 @@ import java.util.function.Function;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 
+import com.gtnewhorizons.wdmla.api.Identifiers;
 import com.gtnewhorizons.wdmla.api.accessor.AccessorClientHandler;
 import com.gtnewhorizons.wdmla.api.accessor.BlockAccessor;
 import com.gtnewhorizons.wdmla.api.provider.IComponentProvider;
@@ -65,6 +66,7 @@ public class BlockAccessorClientHandler implements AccessorClientHandler<BlockAc
         WailaPacketHandler.INSTANCE.sendToServer(new Message0x01TERequest(accessor.getTileEntity(), keys));
     }
 
+    /** Collects native components and removes only legacy rows they actually replace. */
     @Override
     public void gatherComponents(BlockAccessor accessor, Function<IWDMlaProvider, ITooltip> tooltipProvider) {
         // step 1: setup legacy DataAccessor with legacy WailaStack
@@ -76,16 +78,23 @@ public class BlockAccessorClientHandler implements AccessorClientHandler<BlockAc
         }
 
         // step 2: gather WDMla tooltip components including icon, block name and mod name (with WailaStack override)
+        boolean nativeItemStorageRendered = false;
         for (IComponentProvider<BlockAccessor> provider : WDMlaClientRegistration.instance().getBlockProviders(
                 accessor.getBlock(),
                 iComponentProvider -> WDMlaConfig.instance().isProviderEnabled(iComponentProvider))) {
             ITooltip middleTooltip = tooltipProvider.apply(provider);
+            int previousChildren = middleTooltip.childrenSize();
             provider.appendTooltip(middleTooltip, accessor);
+            if (Identifiers.ITEM_STORAGE.equals(provider.getUid())
+                    && middleTooltip.childrenSize() > previousChildren) {
+                nativeItemStorageRendered = true;
+            }
         }
 
         // step 3: gather raw tooltip lines from the old Waila api (this may include Waila regex which represents
         // ItemStack or Progressbar)
-        List<String> legacyTooltips = dataProviderCompat.getLegacyBlockTooltips(itemForm, legacyAccessor);
+        List<String> legacyTooltips = dataProviderCompat
+                .getLegacyBlockTooltips(itemForm, legacyAccessor, nativeItemStorageRendered);
 
         // step 4: Convert legacy tooltip String to actual various WDMla component
         ITooltip convertedTooltips = tooltipCompat.computeRenderables(legacyTooltips);

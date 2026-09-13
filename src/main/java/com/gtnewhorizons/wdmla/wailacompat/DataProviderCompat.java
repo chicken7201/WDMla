@@ -23,8 +23,9 @@ import mcp.mobius.waila.utils.WailaExceptionHandler;
  */
 public class DataProviderCompat {
 
-    /** Collects legacy block tooltip lines, including current Waila advanced-body data. */
-    public List<String> getLegacyBlockTooltips(ItemStack itemForm, DataAccessorCommon legacyAccessor) {
+    /** Collects legacy block tooltip lines while removing item rows already represented by the native summary. */
+    public List<String> getLegacyBlockTooltips(ItemStack itemForm, DataAccessorCommon legacyAccessor,
+            boolean nativeItemStorageRendered) {
         List<String> legacyTooltips = new TipList<String, String>();
         try {
             // some WailaHead Handlers modify item name text, so we have to insert dummy item name to avoid crash
@@ -52,7 +53,12 @@ public class DataProviderCompat {
                 for (IWailaDataProvider dataProvider : providersList) {
                     int previousSize = legacyTooltips.size();
                     legacyTooltips = dataProvider.getWailaBody(itemForm, legacyTooltips, legacyAccessor, config);
-                    LegacyItemStorageCompat.filterBody(dataProvider, legacyAccessor, previousSize, legacyTooltips);
+                    LegacyItemStorageCompat.filterBody(
+                            dataProvider,
+                            legacyAccessor,
+                            previousSize,
+                            legacyTooltips,
+                            nativeItemStorageRendered);
                     LegacyFluidStorageCompat.filterBody(
                             dataProvider,
                             legacyAccessor.getTileEntity(),
@@ -69,7 +75,8 @@ public class DataProviderCompat {
                                     dataProvider,
                                     legacyAccessor,
                                     previousAdvancedSize,
-                                    legacyTooltips);
+                                    legacyTooltips,
+                                    nativeItemStorageRendered);
                             LegacyFluidStorageCompat.filterBody(
                                     dataProvider,
                                     legacyAccessor.getTileEntity(),
