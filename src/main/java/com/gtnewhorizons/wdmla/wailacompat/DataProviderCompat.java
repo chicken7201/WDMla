@@ -58,6 +58,7 @@ public class DataProviderCompat {
                             legacyAccessor.getTileEntity(),
                             previousSize,
                             legacyTooltips);
+                    LegacyGregTechTooltipCompat.filterBody(dataProvider, previousSize, legacyTooltips);
                     if (dataProvider.hasWailaAdvancedBody(itemForm, legacyAccessor, config)) {
                         hasAdvancedBodyAvailable = true;
                         if (isAdvancedKeyDown) {
