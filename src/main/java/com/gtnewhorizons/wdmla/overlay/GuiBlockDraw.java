@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 import org.joml.Vector3f;
 import org.joml.Vector4i;
@@ -39,6 +40,7 @@ public class GuiBlockDraw {
     private static final GuiBlockDraw instance = new GuiBlockDraw();
     public static final float ZOOM = 2.3f;
 
+    /** Draws a world block inside the requested HUD viewport. */
     public static void drawWorldBlock(int x, int y, int width, int height, int blockX, int blockY, int blockZ,
             float rotationYaw, float rotationPitch) {
         Vector3f center = new Vector3f(blockX + 0.5f, blockY + 0.5f, blockZ + 0.5f);
@@ -57,17 +59,21 @@ public class GuiBlockDraw {
         instance.render(windowX, windowY, windowWidth, windowHeight);
     }
 
+    /** Renders the preview and restores the HUD camera even if a mod renderer fails. */
     private void render(int x, int y, int width, int height) {
         rect.set(x, y, width, height);
         // setupCamera
         setupCamera();
 
         // render World
-        drawWorld();
-
-        resetCamera();
+        try {
+            drawWorld();
+        } finally {
+            resetCamera();
+        }
     }
 
+    /** Positions the preview camera around the selected block center. */
     public void setCameraLookAt(Vector3f lookAt, double radius, double rotationPitch, double rotationYaw) {
         this.lookAt.set(lookAt);
         eyePos.set((float) Math.cos(rotationPitch), 0, (float) Math.sin(rotationPitch))
@@ -75,14 +81,17 @@ public class GuiBlockDraw {
                 .add(lookAt);
     }
 
+    /** Converts a horizontal GUI coordinate to display pixels. */
     private static int getScaledX(Minecraft mc, ScaledResolution res, int x) {
         return (int) (x / (res.getScaledWidth() * 1.0) * mc.displayWidth);
     }
 
+    /** Converts a vertical GUI coordinate to display pixels. */
     private static int getScaledY(Minecraft mc, ScaledResolution res, int y) {
         return (int) (y / (res.getScaledHeight() * 1.0) * mc.displayHeight);
     }
 
+    /** Saves the HUD state and installs the preview viewport and perspective. */
     public void setupCamera() {
         int x = rect.x;
         int y = rect.y;
@@ -118,12 +127,14 @@ public class GuiBlockDraw {
                 .gluLookat(eyePos.x, eyePos.y, eyePos.z, lookAt.x, lookAt.y, lookAt.z, worldUp.x, worldUp.y, worldUp.z);
     }
 
+    /** Sets the scissor rectangle used by the preview viewport. */
     protected void scissorView(int x, int y, int width, int height) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(x, y, width, height);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
+    /** Restores the HUD matrices, viewport, and OpenGL attributes. */
     public static void resetCamera() {
         // reset viewport
         Minecraft minecraft = Minecraft.getMinecraft();
@@ -144,6 +155,7 @@ public class GuiBlockDraw {
         glPopAttrib();
     }
 
+    /** Draws the block mesh and permitted tile-entity renderers. */
     protected void drawWorld() {
 
         Minecraft mc = Minecraft.getMinecraft();
@@ -164,22 +176,24 @@ public class GuiBlockDraw {
 
         // render TESR
         TileEntityRendererDispatcher tesr = TileEntityRendererDispatcher.instance;
-        for (int pass = 0; pass < 2; pass++) {
-            ForgeHooksClient.setRenderPass(pass);
-            int finalPass = pass;
-
-            int x = renderedBlock.x;
-            int y = renderedBlock.y;
-            int z = renderedBlock.z;
-            setDefaultPassRenderState(finalPass);
-            TileEntity tile = Minecraft.getMinecraft().theWorld.getTileEntity(x, y, z);
-            if (tile != null && shouldRenderTileEntityPreview(tile) && tesr.hasSpecialRenderer(tile)) {
-                if (tile.shouldRenderInPass(finalPass)) {
-                    tesr.renderTileEntityAt(tile, x, y, z, 0);
+        int savedRenderPass = MinecraftForgeClient.getRenderPass();
+        try {
+            for (int pass = 0; pass < 2; pass++) {
+                ForgeHooksClient.setRenderPass(pass);
+                int x = renderedBlock.x;
+                int y = renderedBlock.y;
+                int z = renderedBlock.z;
+                setDefaultPassRenderState(pass);
+                TileEntity tile = mc.theWorld.getTileEntity(x, y, z);
+                if (tile != null && shouldRenderTileEntityPreview(tile) && tesr.hasSpecialRenderer(tile)) {
+                    if (tile.shouldRenderInPass(pass)) {
+                        tesr.renderTileEntityAt(tile, x, y, z, 0);
+                    }
                 }
             }
+        } finally {
+            ForgeHooksClient.setRenderPass(savedRenderPass);
         }
-        ForgeHooksClient.setRenderPass(-1);
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         glDepthMask(true);
@@ -195,33 +209,46 @@ public class GuiBlockDraw {
         return true;
     }
 
+    /** Draws each mesh pass with the Forge context required by GregTech textures. */
     public void renderBlocks(Tessellator tessellator, BlockPos blocksToRender) {
         if (blocksToRender == null) return;
         Minecraft mc = Minecraft.getMinecraft();
         final int savedAo = mc.gameSettings.ambientOcclusion;
+        final int savedWorldRenderPass = ForgeHooksClient.worldRenderPass;
+        final int savedRenderPass = MinecraftForgeClient.getRenderPass();
+        int x = blocksToRender.x;
+        int y = blocksToRender.y;
+        int z = blocksToRender.z;
+        Block block = mc.theWorld.getBlock(x, y, z);
         mc.gameSettings.ambientOcclusion = 0;
-        tessellator.startDrawingQuads();
         try {
-            tessellator.setBrightness(15 << 20 | 15 << 4);
-            for (int i = 0; i < 2; i++) {
-                int x = blocksToRender.x;
-                int y = blocksToRender.y;
-                int z = blocksToRender.z;
-                Block block = Minecraft.getMinecraft().theWorld.getBlock(x, y, z);
-                if (block.equals(Blocks.air) || !block.canRenderInPass(i)) continue;
+            for (int pass = 0; pass < 2; pass++) {
+                // GregTech textures read the world pass, which is separate from the TESR pass.
+                ForgeHooksClient.worldRenderPass = pass;
+                ForgeHooksClient.setRenderPass(pass);
+                if (block.equals(Blocks.air) || !block.canRenderInPass(pass)) continue;
 
-                bufferBuilder.blockAccess = Minecraft.getMinecraft().theWorld;
+                setDefaultPassRenderState(pass);
+                bufferBuilder.blockAccess = mc.theWorld;
                 bufferBuilder.setRenderBounds(0, 0, 0, 1, 1, 1);
                 bufferBuilder.renderAllFaces = true;
-                bufferBuilder.renderBlockByRenderType(block, x, y, z);
+                tessellator.startDrawingQuads();
+                try {
+                    tessellator.setBrightness(15 << 20 | 15 << 4);
+                    bufferBuilder.renderBlockByRenderType(block, x, y, z);
+                } finally {
+                    tessellator.draw();
+                }
             }
         } finally {
+            ForgeHooksClient.worldRenderPass = savedWorldRenderPass;
+            ForgeHooksClient.setRenderPass(savedRenderPass);
             mc.gameSettings.ambientOcclusion = savedAo;
-            tessellator.draw();
             tessellator.setTranslation(0, 0, 0);
         }
     }
 
+    /** Applies depth and blending settings for opaque or translucent geometry. */
     public static void setDefaultPassRenderState(int pass) {
         glColor4f(1, 1, 1, 1);
         if (pass == 0) { // SOLID
