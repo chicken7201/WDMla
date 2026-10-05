@@ -35,7 +35,7 @@ public class GuiBlockDraw {
     private final Vector3f lookAt = new Vector3f(0, 0, 0);
     private final Vector3f worldUp = new Vector3f(0, 1, 0);
     private Vector4i rect = new Vector4i();
-    private final RenderBlocks bufferBuilder = new RenderBlocks();
+    private final RenderBlocks bufferBuilder = new SnowCoverRenderBlocks();
 
     private static final GuiBlockDraw instance = new GuiBlockDraw();
     public static final float ZOOM = 2.3f;

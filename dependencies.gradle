@@ -6,6 +6,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
     testRuntimeOnly("it.unimi.dsi:fastutil:8.5.18")
+    // Minecraft client classes need LWJGL even when tests only capture vertices without OpenGL calls.
+    testRuntimeOnly("org.lwjgl.lwjgl:lwjgl:2.9.4-nightly-20150209") {transitive = false}
     devOnlyNonPublishable('com.github.GTNewHorizons:NotEnoughItems:2.8.93-GTNH:dev')
     compileOnly rfg.deobf("curse.maven:hunger-overhaul-224476:2332505")
     compileOnly('com.github.GTNewHorizons:harvestcraft:1.3.11-GTNH:dev') {transitive = false}
