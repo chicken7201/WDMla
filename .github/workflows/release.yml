@@ -1,49 +1,121 @@
-name: Build and Release
+name: Release tagged build
 
 on:
+  workflow_dispatch:
+    inputs:
+      upstream_version:
+        description: 'Upstream release version (blank = latest; use the version actually merged into this fork)'
+        type: string
+        required: false
+      bump:
+        description: 'Fork version increment'
+        type: choice
+        required: true
+        default: patch
+        options: [patch, minor, major]
+      release_existing:
+        description: 'Internal: build a pre-existing tag; do not select manually'
+        type: boolean
+        required: false
+        default: false
   push:
     tags:
-      - "v*"
+      - 'v*fork-v*'
 
 permissions:
   contents: write
+  actions: write
+
+concurrency:
+  group: fork-release-version
+  cancel-in-progress: false
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-
+  create-tag:
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.release_existing }}
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Determine and create fork tag
+        id: version
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_INPUT: ${{ inputs.upstream_version }}
+          BUMP: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+          git fetch --tags --force origin
+          upstream="$UPSTREAM_INPUT"
+          if [[ -z "$upstream" ]]; then
+            upstream="$(gh api repos/GTNewHorizons/WDMla/releases/latest --jq '.tag_name')"
+          fi
+          upstream="${upstream#v}"
+          if [[ ! "$upstream" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid upstream version: $upstream (expected X.Y.Z)" >&2
+            exit 1
+          fi
+          # WDMla SemVer continues across upstream releases.
+          latest="$(git tag --list | sed -nE 's/^v[0-9]+\.[0-9]+\.[0-9]+fork-v([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' | sort -V | tail -1)"
+          if [[ -z "$latest" ]]; then
+            major=1; minor=0; patch=0
+          else
+            IFS='.' read -r major minor patch <<< "$latest"
+            case "$BUMP" in
+              major) major=$((major + 1)); minor=0; patch=0 ;;
+              minor) minor=$((minor + 1)); patch=0 ;;
+              patch) patch=$((patch + 1)) ;;
+              *) echo "Invalid bump: $BUMP" >&2; exit 1 ;;
+            esac
+          fi
+          tag="v${upstream}fork-v${major}.${minor}.${patch}"
+          if git show-ref --verify --quiet "refs/tags/$tag"; then
+            echo "Tag already exists: $tag" >&2
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag -a "$tag" -m "Ver $tag" "$GITHUB_SHA"
+          git push origin "refs/tags/$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - name: Start tagged release workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          # workflow_dispatch is allowed to trigger another workflow with GITHUB_TOKEN.
+          gh workflow run release.yml --ref "$TAG" -f release_existing=true -f bump=patch
 
+  release:
+    if: ${{ github.event_name == 'push' || inputs.release_existing }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-
+          java-version: '17'
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-
-      - name: Grant execute permission
-        run: chmod +x gradlew
-
       - name: Build
-        run: ./gradlew build
-
-      - name: Show generated JARs
         run: |
-          echo "Generated JARs:"
-          find build/libs -name "*.jar"
-
-      - name: Create Release
+          chmod +x gradlew
+          ./gradlew build
+          find build/libs -name '*.jar'
+      - name: Publish GitHub Release
+        shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${ github.token }
+          TAG: ${ github.ref_name }
         run: |
-          if gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
-            gh release upload "${{ github.ref_name }}" build/libs/*.jar --clobber
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" build/libs/*.jar --clobber
           else
-            gh release create "${{ github.ref_name }}" \
-              build/libs/*.jar \
-              --title "${{ github.ref_name }}" \
-              --generate-notes
+            gh release create "$TAG" build/libs/*.jar --verify-tag --title "$TAG" --generate-notes
           fi
