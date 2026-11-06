@@ -106,9 +106,8 @@ public class GuiBlockDraw {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
 
-        // setup viewport and clear GL buffers
+        // Clear the world's depth only inside the preview before drawing its model.
         glViewport(x, y, width, height);
-
         scissorView(x, y, width, height);
 
         // setup projection matrix to perspective
@@ -127,10 +126,13 @@ public class GuiBlockDraw {
                 .gluLookat(eyePos.x, eyePos.y, eyePos.z, lookAt.x, lookAt.y, lookAt.z, worldUp.x, worldUp.y, worldUp.z);
     }
 
-    /** Sets the scissor rectangle used by the preview viewport. */
+    /** Clears stale world depth within the preview viewport. */
     protected void scissorView(int x, int y, int width, int height) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(x, y, width, height);
+        GL11.glDepthMask(true);
+        GL11.glClearDepth(1.0);
+        GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
