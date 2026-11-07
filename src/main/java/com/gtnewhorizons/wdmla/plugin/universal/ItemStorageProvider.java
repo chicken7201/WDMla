@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.ItemStack;
@@ -48,7 +49,6 @@ import com.gtnewhorizons.wdmla.impl.ui.component.HPanelComponent;
 import com.gtnewhorizons.wdmla.impl.ui.component.ItemComponent;
 import com.gtnewhorizons.wdmla.impl.ui.component.RectComponent;
 import com.gtnewhorizons.wdmla.impl.ui.component.TextComponent;
-import com.gtnewhorizons.wdmla.impl.ui.component.TooltipComponent;
 import com.gtnewhorizons.wdmla.impl.ui.sizer.Size;
 import com.gtnewhorizons.wdmla.impl.ui.style.PanelStyle;
 import com.gtnewhorizons.wdmla.impl.ui.style.RectStyle;
@@ -128,6 +128,7 @@ public class ItemStorageProvider<T extends Accessor> implements IComponentProvid
         return new ViewGroup<>(itemStacks, contentDecodedGroup);
     }
 
+    /** Adds item storage groups and sizes icon spacing for wide count overlays. */
     public static void append(ITooltip tooltip, Accessor accessor, List<ClientViewGroup<ItemView>> groups) {
         boolean renderGroup = groups.size() > 1 || groups.get(0).shouldRenderGroup();
         ClientViewGroup.tooltip(tooltip, groups, renderGroup, (theTooltip, group) -> {
@@ -169,7 +170,8 @@ public class ItemStorageProvider<T extends Accessor> implements IComponentProvid
             int drawnCount = 0;
             int realSize = accessor.showDetails() ? config.detailedAmount : config.normalAmount;
             realSize = Math.min(group.views.size(), realSize);
-            TooltipComponent elements = new HPanelComponent();
+            HPanelComponent elements = new HPanelComponent();
+            float rowSpacing = new PanelStyle().getSpacing();
 
             for (int i = 0; i < realSize; i++) {
                 ItemView itemView = group.views.get(i);
@@ -180,6 +182,7 @@ public class ItemStorageProvider<T extends Accessor> implements IComponentProvid
                 if (i > 0 && (showName.isTrue() || drawnCount >= config.itemsPerLine)) {
                     theTooltip.child(elements);
                     elements = new HPanelComponent();
+                    rowSpacing = new PanelStyle().getSpacing();
                     drawnCount = 0;
                 }
 
@@ -194,6 +197,10 @@ public class ItemStorageProvider<T extends Accessor> implements IComponentProvid
                 } else {
                     elements.item(stack);
                 }
+                if (!showName.isTrue()) {
+                    rowSpacing = Math.max(rowSpacing, getItemSpacing(itemView));
+                    elements.style(new PanelStyle().spacing(rowSpacing));
+                }
                 drawnCount += 1;
             }
 
@@ -201,6 +208,13 @@ public class ItemStorageProvider<T extends Accessor> implements IComponentProvid
                 theTooltip.child(elements);
             }
         });
+    }
+
+    /** Leaves enough space before each icon for the preceding item's count overlay. */
+    private static float getItemSpacing(ItemView view) {
+        String count = view.amountText != null ? view.amountText : String.valueOf(view.item.stackSize);
+        int overhang = Minecraft.getMinecraft().fontRenderer.getStringWidth(count) - ItemComponent.DEFAULT_W;
+        return Math.max(0, overhang + 2);
     }
 
     public static MutableBoolean getShowName(ClientViewGroup<ItemView> group) {

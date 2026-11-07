@@ -168,7 +168,6 @@ public class GuiBlockDraw {
         mc.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
         glDisable(GL_LIGHTING);
         glEnable(GL_TEXTURE_2D);
-        glEnable(GL_ALPHA_TEST);
 
         Tessellator tessellator = Tessellator.instance;
         renderBlocks(tessellator, renderedBlock);
@@ -254,10 +253,15 @@ public class GuiBlockDraw {
     public static void setDefaultPassRenderState(int pass) {
         glColor4f(1, 1, 1, 1);
         if (pass == 0) { // SOLID
+            glEnable(GL_ALPHA_TEST);
+            glAlphaFunc(GL_GREATER, 0.1f);
             glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
             glDepthMask(true);
         } else { // TRANSLUCENT
+            // Preserve faint texels in glass and other sparse translucent textures.
+            glDisable(GL_ALPHA_TEST);
+            glEnable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDepthMask(false);
