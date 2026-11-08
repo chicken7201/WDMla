@@ -544,3 +544,6 @@ hud.msg.wdmla.ae2.cell.usage.value=empty %s, used %s, full %s
 hud.msg.wdmla.ae2.cell.bytes=Cell bytes
 hud.msg.wdmla.ae2.cell.types=Cell types
 hud.msg.wdmla.ae2.cell.types.value=item %s, fluid %s, essentia %s
+provider.wdmla.avaritia.compressor_progress=Avaritia Compressor Progress
+provider.wdmla.witchinggadgets.spinning_wheel_progress=Spinning Wheel Progress
+hud.msg.wdmla.avaritia.ingredients=Ingredients

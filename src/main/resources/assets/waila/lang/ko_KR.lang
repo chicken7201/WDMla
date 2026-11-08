@@ -497,3 +497,6 @@ hud.msg.wdmla.ae2.cell.usage.value=비어 있음 %s, 사용 중 %s, 가득 참 %
 hud.msg.wdmla.ae2.cell.bytes=셀 바이트
 hud.msg.wdmla.ae2.cell.types=셀 종류
 hud.msg.wdmla.ae2.cell.types.value=아이템 %s, 유체 %s, 에센시아 %s
+provider.wdmla.avaritia.compressor_progress=아바리티아 압축기 진행률
+provider.wdmla.witchinggadgets.spinning_wheel_progress=방적 물레 진행률
+hud.msg.wdmla.avaritia.ingredients=재료
