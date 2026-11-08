@@ -29,3 +29,5 @@ src/main/resources/mixins.*.json
 *.bat
 /src/doc/
 /libs/
+/report/
+/reports/
